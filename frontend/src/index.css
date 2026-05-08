@@ -18,6 +18,8 @@
     text-rendering: optimizeLegibility;
     /* Mobile: horizontal scroll yo'q */
     overflow-x: hidden;
+    /* iOS Safari: bounce faqat vertikal bo'lsin */
+    height: 100%;
   }
 
   body {
@@ -28,8 +30,21 @@
     /* Mobile: horizontal scroll yo'q, full height */
     overflow-x: hidden;
     min-height: 100dvh;
-    /* Capacitor / PWA: safe area */
+    /* iOS: safe area (notch, Dynamic Island, home indicator) */
     padding-top: env(safe-area-inset-top, 0px);
+    /* iOS: momentum scroll */
+    -webkit-overflow-scrolling: touch;
+    /* iOS: orientation o'zgarganda text resize bo'lmasin */
+    -webkit-text-size-adjust: 100%;
+  }
+
+  /* iOS Safari: input auto-zoom oldini olish
+     (font-size 16px dan kichik bo'lsa Safari zoom qiladi) */
+  input, select, textarea {
+    font-size: max(16px, 1em);
+  }
+  @media (min-width: 768px) {
+    input, select, textarea { font-size: 15px; }
   }
 
   .dark body {
