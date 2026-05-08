@@ -23,6 +23,7 @@ const Goals          = lazy(() => import('./pages/Goals'));
 const Categories     = lazy(() => import('./pages/Categories'));
 const Budgets        = lazy(() => import('./pages/Budgets'));
 const Reports        = lazy(() => import('./pages/Reports'));
+const Analytics      = lazy(() => import('./pages/Analytics'));
 const Family         = lazy(() => import('./pages/Family'));
 const JoinFamily     = lazy(() => import('./pages/JoinFamily'));
 const Profile        = lazy(() => import('./pages/Profile'));
@@ -151,6 +152,7 @@ function App() {
                     <Route path="categories"   element={<Categories />} />
                     <Route path="budgets"      element={<Budgets />} />
                     <Route path="reports"      element={<Reports />} />
+                    <Route path="analytics"    element={<Analytics />} />
                     <Route path="family"       element={<Family />} />
                     <Route path="profile"      element={<Profile />} />
                     <Route path="admin"        element={<Admin />} />

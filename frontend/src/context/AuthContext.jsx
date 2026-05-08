@@ -62,10 +62,10 @@ export const AuthProvider = ({ children }) => {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       
       setUser(userData);
-      toast.success('Welcome back!');
+      toast.success('Xush kelibsiz! 👋');
       return true;
     } catch (error) {
-      const message = error.response?.data?.error || 'Login failed';
+      const message = error.response?.data?.error || "Email yoki parol noto'g'ri";
       toast.error(message);
       return false;
     }
@@ -86,10 +86,10 @@ export const AuthProvider = ({ children }) => {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       
       setUser(userData);
-      toast.success('Account created successfully!');
+      toast.success("Hisob muvaffaqiyatli yaratildi! 🎉");
       return true;
     } catch (error) {
-      const message = error.response?.data?.error || 'Registration failed';
+      const message = error.response?.data?.error || "Ro'yxatdan o'tishda xatolik yuz berdi";
       toast.error(message);
       return false;
     }
@@ -100,7 +100,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('user');
     delete axios.defaults.headers.common['Authorization'];
     setUser(null);
-    toast.success('Logged out successfully');
+    toast.success('Tizimdan muvaffaqiyatli chiqildi');
   };
 
   const value = {

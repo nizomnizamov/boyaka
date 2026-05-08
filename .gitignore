@@ -58,3 +58,16 @@ coverage/
 
 # Personal development tracking (local only)
 DEVELOPMENT-LOG.md
+
+# ── Android / Capacitor ────────────────────────────────────────
+# Android build artifacts (generate qilinadi)
+frontend/android/app/build/
+frontend/android/build/
+frontend/android/.gradle/
+frontend/android/local.properties
+# Capacitor sync qiladigan web assets (dist dan nusxa olinadi)
+frontend/android/app/src/main/assets/public/
+# Keystore — HECH QACHON COMMIT QILMANG!
+*.keystore
+*.jks
+

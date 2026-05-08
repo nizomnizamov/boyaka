@@ -16,6 +16,8 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+    /* Mobile: horizontal scroll yo'q */
+    overflow-x: hidden;
   }
 
   body {
@@ -23,6 +25,11 @@
     font-size: 15px;
     line-height: 1.5;
     transition: background-color 0.2s ease, color 0.2s ease;
+    /* Mobile: horizontal scroll yo'q, full height */
+    overflow-x: hidden;
+    min-height: 100dvh;
+    /* Capacitor / PWA: safe area */
+    padding-top: env(safe-area-inset-top, 0px);
   }
 
   .dark body {
