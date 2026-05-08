@@ -46,59 +46,20 @@ router.post('/register',
       // Create default categories for new user
       const defaultCategories = [
         // === DAROMAD ===
-        { name: 'Maosh / Ish haqi', type: 'income', icon: 'briefcase', color: '#10B981' },
-        { name: 'Freelance / Loyiha', type: 'income', icon: 'monitor', color: '#06B6D4' },
-        { name: 'Biznes daromadi', type: 'income', icon: 'trending-up', color: '#3B82F6' },
-        { name: 'Investitsiya daromadi', type: 'income', icon: 'bar-chart-2', color: '#8B5CF6' },
-        { name: 'Ijara daromadi', type: 'income', icon: 'home', color: '#F59E0B' },
-        { name: 'Sovg\'a / Bonus', type: 'income', icon: 'gift', color: '#EC4899' },
-        { name: 'Boshqa daromad', type: 'income', icon: 'plus-circle', color: '#64748B' },
+        { name: 'Oylik',        type: 'income',  icon: 'briefcase',    color: '#10B981' },
+        { name: 'Biznes',       type: 'income',  icon: 'trending-up',  color: '#3B82F6' },
+        { name: 'Investitsiya', type: 'income',  icon: 'bar-chart-2',  color: '#8B5CF6' },
+        { name: 'Boshqa',       type: 'income',  icon: 'plus-circle',  color: '#64748B' },
 
-        // === OZIQ-OVQAT ===
-        { name: 'Oziq-ovqat / Bozor', type: 'expense', icon: 'shopping-cart', color: '#EF4444' },
-        { name: 'Restoran / Kafe', type: 'expense', icon: 'coffee', color: '#F97316' },
-
-        // === UY-JOY ===
-        { name: 'Ijara / Ipoteka', type: 'expense', icon: 'home', color: '#6366F1' },
-        { name: 'Kommunal to\'lovlar', type: 'expense', icon: 'zap', color: '#8B5CF6' },
-        { name: 'Uy jihozlari / Ta\'mir', type: 'expense', icon: 'tool', color: '#0EA5E9' },
-
-        // === TRANSPORT ===
-        { name: 'Transport / Yo\'l kira', type: 'expense', icon: 'navigation', color: '#F59E0B' },
-        { name: 'Benzin / Avtomobil', type: 'expense', icon: 'truck', color: '#D97706' },
-
-        // === SOG\'LIQ ===
-        { name: 'Sog\'liq / Dori', type: 'expense', icon: 'activity', color: '#10B981' },
-        { name: 'Sport / Fitnes', type: 'expense', icon: 'heart', color: '#059669' },
-
-        // === TA\'LIM ===
-        { name: 'Ta\'lim / Kurslar', type: 'expense', icon: 'book-open', color: '#3B82F6' },
-        { name: 'Kitob / Kontent', type: 'expense', icon: 'book', color: '#2563EB' },
-
-        // === KIYIM ===
-        { name: 'Kiyim / Poyabzal', type: 'expense', icon: 'shopping-bag', color: '#EC4899' },
-
-        // === KO\'NGILOCHAR ===
-        { name: 'Ko\'ngilochar / Dam olish', type: 'expense', icon: 'smile', color: '#F43F5E' },
-        { name: 'Sayohat / Safar', type: 'expense', icon: 'map', color: '#06B6D4' },
-
-        // === OILAvIY ===
-        { name: 'Ota-ona / Oila', type: 'expense', icon: 'users', color: '#7C3AED' },
-        { name: 'Farzandlar / Maktab', type: 'expense', icon: 'user-check', color: '#4F46E5' },
-        { name: 'Ehson / Sadaqa', type: 'expense', icon: 'heart', color: '#BE185D' },
-
-        // === MOLIYAVIY MAQSADLAR ===
-        { name: 'Moliyaviy yostiq', type: 'expense', icon: 'shield', color: '#16A34A' },
-        { name: 'Kapital / Investitsiya', type: 'expense', icon: 'trending-up', color: '#1D4ED8' },
-        { name: 'Orzu fondi', type: 'expense', icon: 'star', color: '#D97706' },
-        { name: 'Qarz to\'lash', type: 'expense', icon: 'credit-card', color: '#DC2626' },
-
-        // === BIZNES ===
-        { name: 'Biznes xarajatlari', type: 'expense', icon: 'briefcase', color: '#475569' },
-        { name: 'Soliq / To\'lovlar', type: 'expense', icon: 'file-text', color: '#64748B' },
-
-        // === BOSHQA ===
-        { name: 'Boshqa xarajatlar', type: 'expense', icon: 'more-horizontal', color: '#94A3B8' },
+        // === XARAJAT ===
+        { name: 'Oziq-ovqat',  type: 'expense', icon: 'shopping-cart', color: '#EF4444' },
+        { name: 'Zapravka',    type: 'expense', icon: 'truck',          color: '#D97706' },
+        { name: 'Sport',       type: 'expense', icon: 'activity',       color: '#059669' },
+        { name: 'Kurs',        type: 'expense', icon: 'book-open',      color: '#3B82F6' },
+        { name: 'Onam',        type: 'expense', icon: 'users',          color: '#7C3AED' },
+        { name: 'Kiyim',       type: 'expense', icon: 'shopping-bag',   color: '#EC4899' },
+        { name: 'Dam olish',   type: 'expense', icon: 'smile',          color: '#F43F5E' },
+        { name: 'Boshqa',      type: 'expense', icon: 'more-horizontal',color: '#94A3B8' },
       ];
 
       for (const cat of defaultCategories) {

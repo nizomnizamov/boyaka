@@ -34,17 +34,24 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
           
           // Create default categories for new user
           const defaultCategories = [
-            { name: 'Salary', type: 'income' },
-            { name: 'Food & Dining', type: 'expense' },
-            { name: 'Transportation', type: 'expense' },
-            { name: 'Shopping', type: 'expense' },
-            { name: 'Entertainment', type: 'expense' }
+            { name: 'Oylik',        type: 'income',  icon: 'briefcase',     color: '#10B981' },
+            { name: 'Biznes',       type: 'income',  icon: 'trending-up',   color: '#3B82F6' },
+            { name: 'Investitsiya', type: 'income',  icon: 'bar-chart-2',   color: '#8B5CF6' },
+            { name: 'Boshqa',       type: 'income',  icon: 'plus-circle',   color: '#64748B' },
+            { name: 'Oziq-ovqat',  type: 'expense', icon: 'shopping-cart',  color: '#EF4444' },
+            { name: 'Zapravka',    type: 'expense', icon: 'truck',           color: '#D97706' },
+            { name: 'Sport',       type: 'expense', icon: 'activity',        color: '#059669' },
+            { name: 'Kurs',        type: 'expense', icon: 'book-open',       color: '#3B82F6' },
+            { name: 'Onam',        type: 'expense', icon: 'users',           color: '#7C3AED' },
+            { name: 'Kiyim',       type: 'expense', icon: 'shopping-bag',    color: '#EC4899' },
+            { name: 'Dam olish',   type: 'expense', icon: 'smile',           color: '#F43F5E' },
+            { name: 'Boshqa',      type: 'expense', icon: 'more-horizontal', color: '#94A3B8' },
           ];
-          
+
           for (const cat of defaultCategories) {
             await pool.query(
-              'INSERT INTO categories (user_id, name, type) VALUES ($1, $2, $3)',
-              [newUser.rows[0].id, cat.name, cat.type]
+              'INSERT INTO categories (user_id, name, type, icon, color) VALUES ($1, $2, $3, $4, $5)',
+              [newUser.rows[0].id, cat.name, cat.type, cat.icon, cat.color]
             );
           }
           

@@ -11,7 +11,6 @@ import {
   LogOut,
   X,
   Menu,
-  FolderKanban,
   Wallet,
   PieChart,
   BookOpen,
@@ -37,7 +36,6 @@ const SIDEBAR_MAIN = [
   { to: '/debts',        icon: BookOpen,         labelKey: 'nav.debts' },
   { to: '/goals',        icon: Target,           labelKey: 'nav.goals' },
   { to: '/budgets',      icon: Wallet,           labelKey: 'nav.budgets' },
-  { to: '/categories',   icon: FolderKanban,     labelKey: 'nav.categories' },
   { to: '/strategy',     icon: PieChart,         labelKey: 'nav.strategy' },
   { to: '/reports',      icon: BarChart3,        labelKey: 'nav.reports' },
 ];
@@ -76,7 +74,6 @@ const MoreMenu = ({ isOpen, onClose, user, logout, t }) => {
   const moreItems = [
     { to: '/debts',    icon: BookOpen,   label: t('nav.debts') },
     { to: '/budgets',  icon: Wallet,     label: t('nav.budgets') },
-    { to: '/categories', icon: FolderKanban, label: t('nav.categories') },
     { to: '/strategy', icon: PieChart,   label: t('nav.strategy') },
     { to: '/business', icon: Building2,  label: t('nav.business') },
     { to: '/family',   icon: Users,      label: t('nav.family') },

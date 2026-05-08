@@ -18,7 +18,7 @@
     "logout": "Logout",
     "admin": "Admin",
     "strategy": "Strategy",
-    "debts": "Debt Book",
+    "debts": "P2P",
     "business": "Business"
   },
   "auth": {

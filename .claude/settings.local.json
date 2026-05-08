@@ -38,7 +38,11 @@
       "Bash(taskkill //F //IM node.exe)",
       "Bash(npx vite *)",
       "Bash(curl -s http://localhost:5000/api/health)",
-      "Bash(curl -s http://localhost:4173/)"
+      "Bash(curl -s http://localhost:4173/)",
+      "Bash(git add *)",
+      "Bash(git commit -m 'UI/UX redesign: Dashboard premium Apple-style, P2P nav rename, categories reset *)",
+      "Bash(git checkout *)",
+      "Bash(git merge *)"
     ]
   }
 }
