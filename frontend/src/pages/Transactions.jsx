@@ -3,125 +3,97 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import api from '../lib/api';
 import { useCurrency } from '../context/CurrencyContext';
-import { Plus, Pencil, Trash2, Filter, Download, Repeat, Calendar, Wallet } from 'lucide-react';
+import {
+  Plus, Pencil, Trash2, Filter, Download, Search,
+  TrendingUp, TrendingDown, X, ChevronLeft, ChevronRight,
+  ArrowLeftRight, Repeat, Calendar,
+} from 'lucide-react';
 import { format } from 'date-fns';
-import { enUS, vi, es, fr, de, zhCN, ja, ko, pt, ru } from 'date-fns/locale';
 import toast from 'react-hot-toast';
 import TransactionModal from '../components/TransactionModal';
-import { TableSkeleton, ListSkeleton } from '../components/LoadingSkeleton';
-import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
+import { SegmentedControl } from '../components/ui';
+
+const Skeleton = ({ className }) => <div className={`skeleton ${className}`} />;
+
+const TxSkeleton = () => (
+  <div className="space-y-3">
+    {[...Array(6)].map((_, i) => (
+      <div key={i} className="flex items-center gap-3 py-3">
+        <Skeleton className="w-11 h-11 rounded-2xl" />
+        <div className="flex-1 space-y-2">
+          <Skeleton className="h-4 w-40 rounded-lg" />
+          <Skeleton className="h-3 w-24 rounded-lg" />
+        </div>
+        <Skeleton className="h-5 w-20 rounded-lg" />
+      </div>
+    ))}
+  </div>
+);
 
 const Transactions = () => {
   const navigate = useNavigate();
-  const { t, i18n } = useTranslation();
-  const { formatAmount, formatCurrency, currency } = useCurrency();
-  
-  const getDateLocale = () => {
-    const locales = { en: enUS, vi: vi, es: es, fr: fr, de: de, zh: zhCN, ja: ja, ko: ko, pt: pt, ru: ru };
-    return locales[i18n.language] || enUS;
-  };
-  const [viewMode, setViewMode] = useState('transactions'); // 'transactions' or 'recurring'
+  const { t } = useTranslation();
+  const { formatCurrency, formatAmount, currency } = useCurrency();
+
+  const [viewMode, setViewMode] = useState('transactions');
   const [transactions, setTransactions] = useState([]);
   const [recurringList, setRecurringList] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
-  const [showRecurringModal, setShowRecurringModal] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState(null);
-  const [editingRecurring, setEditingRecurring] = useState(null);
+  const [filterOpen, setFilterOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10);
+  const ITEMS = 15;
+
   const [filters, setFilters] = useState({
-    type: '',
-    category_id: '',
-    start_date: '',
-    end_date: ''
+    type: '', category_id: '', start_date: '', end_date: '',
   });
+
+  const hasFilters = Object.values(filters).some(Boolean);
 
   useEffect(() => {
-    setCurrentPage(1); // Reset to page 1 when filters change
+    setCurrentPage(1);
     fetchTransactions();
     fetchCategories();
-    if (viewMode === 'recurring') {
-      fetchRecurring();
-    }
-  }, [filters, currency, viewMode]); // Add viewMode dependency
-
-  // Keyboard shortcuts
-  useKeyboardShortcuts({
-    onNew: () => viewMode === 'transactions' && handleAdd(),
-    onRecurring: () => window.location.href = '/recurring',
-    onClose: () => setShowModal(false),
-  });
+    if (viewMode === 'recurring') fetchRecurring();
+  }, [filters, currency, viewMode]);
 
   const fetchTransactions = async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams();
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value) params.append(key, value);
-      });
-      
-      // Add display_currency parameter for conversion
+      Object.entries(filters).forEach(([k, v]) => v && params.append(k, v));
       params.append('display_currency', currency);
-      
-      const response = await api.get(`/transactions?${params}`);
-      const data = response.data;
-      setTransactions(data.transactions || data || []);
-    } catch (error) {
-      toast.error(t('transactions.failedToLoad'));
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
+      const res = await api.get(`/transactions?${params}`);
+      setTransactions(res.data.transactions || res.data || []);
+    } catch { toast.error(t('transactions.failedToLoad')); }
+    finally { setLoading(false); }
   };
 
   const fetchCategories = async () => {
     try {
-      const response = await api.get('/categories');
-      setCategories(response.data);
-    } catch (error) {
-      console.error(error);
-    }
+      const res = await api.get('/categories');
+      setCategories(res.data);
+    } catch {}
   };
 
   const fetchRecurring = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/recurring');
-      setRecurringList(Array.isArray(response.data) ? response.data : []);
-    } catch (error) {
-      console.error('Error fetching recurring:', error);
-      setRecurringList([]);
-      if (error.response?.status !== 404 && error.response?.status !== 502) {
-        toast.error('Failed to load recurring transactions');
-      }
-    } finally {
-      setLoading(false);
-    }
+      const res = await api.get('/recurring');
+      setRecurringList(Array.isArray(res.data) ? res.data : []);
+    } catch { setRecurringList([]); }
+    finally { setLoading(false); }
   };
 
   const handleDelete = async (id) => {
     if (!window.confirm(t('transactions.deleteConfirm'))) return;
-
     try {
       await api.delete(`/transactions/${id}`);
       toast.success(t('transactions.transactionDeleted'));
       fetchTransactions();
-    } catch (error) {
-      toast.error(t('transactions.failedToDelete'));
-      console.error(error);
-    }
-  };
-
-  const handleEdit = (transaction) => {
-    setEditingTransaction(transaction);
-    setShowModal(true);
-  };
-
-  const handleAdd = () => {
-    setEditingTransaction(null);
-    setShowModal(true);
+    } catch { toast.error(t('transactions.failedToDelete')); }
   };
 
   const handleModalClose = () => {
@@ -133,383 +105,325 @@ const Transactions = () => {
   const handleExport = async () => {
     try {
       const params = new URLSearchParams();
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value) params.append(key, value);
-      });
-      
-      const response = await api.get(`/reports/export?${params}`, {
-        responseType: 'blob'
-      });
-      
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `transactions-${Date.now()}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      
-      toast.success(t('transactions.exportedSuccess') || 'Transactions exported');
-    } catch (error) {
-      toast.error(t('transactions.failedToExport') || 'Failed to export');
-      console.error(error);
-    }
+      Object.entries(filters).forEach(([k, v]) => v && params.append(k, v));
+      const res = await api.get(`/reports/export?${params}`, { responseType: 'blob' });
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const a = document.createElement('a');
+      a.href = url; a.setAttribute('download', `transactions-${Date.now()}.csv`);
+      document.body.appendChild(a); a.click(); a.remove();
+      toast.success('Eksport qilindi');
+    } catch { toast.error('Eksport qilishda xatolik'); }
   };
 
+  // Pagination
+  const totalPages = Math.ceil(transactions.length / ITEMS);
+  const paginated = transactions.slice((currentPage - 1) * ITEMS, currentPage * ITEMS);
+
+  // Summary
+  const income = transactions.filter(t => t.type === 'income').reduce((s, t) => s + parseFloat(t.amount), 0);
+  const expense = transactions.filter(t => t.type === 'expense').reduce((s, t) => s + parseFloat(t.amount), 0);
+
+  const SEG = [
+    { value: 'transactions', label: 'Tranzaksiyalar' },
+    { value: 'recurring', label: 'Takroriy' },
+  ];
+
   return (
-    <div className="space-y-4 sm:space-y-6">
-      {/* Header with Tab Toggle */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-        <div>
-        <h1 className="text-2xl sm:text-3xl font-bold">{t('transactions.title')}</h1>
-          {/* Tab Toggle */}
-          <div className="flex gap-2 mt-3">
-            <button
-              onClick={() => setViewMode('transactions')}
-              className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                viewMode === 'transactions'
-                  ? 'bg-blue-600 text-white shadow-md'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-              }`}
-            >
-              📊 {t('transactions.title')}
-            </button>
-            <button
-              onClick={() => setViewMode('recurring')}
-              className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                viewMode === 'recurring'
-                  ? 'bg-blue-600 text-white shadow-md'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-              }`}
-            >
-              🔁 {t('recurring.title')}
-            </button>
+    <div className="space-y-5 animate-fade-up">
+
+      {/* ── Header ── */}
+      <div className="flex items-center justify-between">
+        <h1 className="page-title">Tranzaksiyalar</h1>
+        <div className="flex items-center gap-2">
+          {viewMode === 'transactions' && (
+            <>
+              <button onClick={() => setFilterOpen(f => !f)}
+                className={`btn-icon ${hasFilters ? 'bg-primary text-white' : 'btn-secondary'}`}>
+                <Filter size={18} />
+              </button>
+              <button onClick={handleExport} className="btn-icon btn-secondary">
+                <Download size={18} />
+              </button>
+            </>
+          )}
+          <button
+            onClick={() => viewMode === 'transactions'
+              ? (setEditingTransaction(null), setShowModal(true))
+              : navigate('/recurring')
+            }
+            className="btn btn-primary btn-sm">
+            <Plus size={18} strokeWidth={2.5} />
+            Qo'shish
+          </button>
+        </div>
+      </div>
+
+      {/* ── Segment ── */}
+      <SegmentedControl options={SEG} value={viewMode} onChange={setViewMode} />
+
+      {/* ── Summary cards (transactions tab) ── */}
+      {viewMode === 'transactions' && !loading && transactions.length > 0 && (
+        <div className="grid grid-cols-3 gap-3">
+          <div className="card py-3 text-center">
+            <p className="text-xs font-semibold text-text-secondary dark:text-dark-text-secondary mb-1">Daromad</p>
+            <p className="text-base font-bold text-income dark:text-income-dark num-display">{formatCurrency(income)}</p>
+          </div>
+          <div className="card py-3 text-center">
+            <p className="text-xs font-semibold text-text-secondary dark:text-dark-text-secondary mb-1">Xarajat</p>
+            <p className="text-base font-bold text-expense dark:text-expense-dark num-display">{formatCurrency(expense)}</p>
+          </div>
+          <div className="card py-3 text-center">
+            <p className="text-xs font-semibold text-text-secondary dark:text-dark-text-secondary mb-1">Jami</p>
+            <p className={`text-base font-bold num-display ${income - expense >= 0 ? 'text-income dark:text-income-dark' : 'text-expense dark:text-expense-dark'}`}>
+              {formatCurrency(Math.abs(income - expense))}
+            </p>
           </div>
         </div>
-        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
-          {viewMode === 'transactions' && (
-          <button onClick={handleExport} className="btn btn-secondary flex items-center justify-center gap-2">
-            <Download size={20} />
-            <span className="hidden sm:inline">{t('transactions.exportCSV')}</span>
-            <span className="sm:hidden">Export</span>
-          </button>
-          )}
-          <button 
-            onClick={() => {
-              if (viewMode === 'transactions') {
-                handleAdd();
-              } else {
-                navigate('/recurring');
-              }
-            }} 
-            className="btn btn-primary flex items-center justify-center gap-2"
-          >
-            <Plus size={20} />
-            <span>{viewMode === 'transactions' ? t('transactions.addTransaction') : t('recurring.addRecurring')}</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Filters - Only show for transactions view */}
-      {viewMode === 'transactions' && (
-      <div className="card">
-        <div className="flex items-center gap-2 mb-4">
-          <Filter size={20} className="text-gray-600 dark:text-gray-400" />
-          <h2 className="text-base sm:text-lg font-semibold text-gray-800 dark:text-white">{t('transactions.filters')}</h2>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          <select
-            value={filters.type}
-            onChange={(e) => setFilters({ ...filters, type: e.target.value })}
-            className="input"
-          >
-            <option value="">{t('transactions.allTypes')}</option>
-            <option value="income">{t('transactions.income')}</option>
-            <option value="expense">{t('transactions.expense')}</option>
-          </select>
-
-          <select
-            value={filters.category_id}
-            onChange={(e) => setFilters({ ...filters, category_id: e.target.value })}
-            className="input"
-          >
-            <option value="">{t('transactions.allCategories')}</option>
-            {categories.map((cat) => (
-              <option key={cat.id} value={cat.id}>
-                {cat.name}
-              </option>
-            ))}
-          </select>
-
-          <input
-            type="date"
-            value={filters.start_date}
-            onChange={(e) => setFilters({ ...filters, start_date: e.target.value })}
-            className="input"
-            placeholder={t('transactions.startDate')}
-          />
-
-          <input
-            type="date"
-            value={filters.end_date}
-            onChange={(e) => setFilters({ ...filters, end_date: e.target.value })}
-            className="input"
-            placeholder={t('transactions.endDate')}
-          />
-        </div>
-        {(filters.type || filters.category_id || filters.start_date || filters.end_date) && (
-          <button
-            onClick={() => setFilters({ type: '', category_id: '', start_date: '', end_date: '' })}
-            className="mt-3 text-sm text-blue-600 dark:text-blue-400 hover:underline"
-          >
-            {t('transactions.clearFilters')}
-          </button>
-        )}
-      </div>
       )}
 
-      {/* Transactions List - Only show for transactions view */}
-      {viewMode === 'transactions' && (
-      <div className="card">
-        {loading ? (
-            <TableSkeleton rows={10} />
-        ) : transactions.length > 0 ? (
-          <>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b dark:border-gray-700">
-                    <th className="text-left py-3 px-4 text-sm sm:text-base text-gray-800 dark:text-gray-200">{t('transactions.date')}</th>
-                    <th className="text-left py-3 px-4 text-sm sm:text-base text-gray-800 dark:text-gray-200">{t('transactions.category')}</th>
-                    <th className="text-left py-3 px-4 text-sm sm:text-base hidden sm:table-cell text-gray-800 dark:text-gray-200">{t('transactions.description')}</th>
-                    <th className="text-left py-3 px-4 text-sm sm:text-base text-gray-800 dark:text-gray-200">{t('transactions.type')}</th>
-                    <th className="text-right py-3 px-4 text-sm sm:text-base text-gray-800 dark:text-gray-200">{t('transactions.amount')}</th>
-                    <th className="text-right py-3 px-4 text-sm sm:text-base text-gray-800 dark:text-gray-200">{t('transactions.actions')}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {transactions
-                    .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
-                    .map((transaction) => (
-                  <tr key={transaction.id} className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                    <td className="py-3 px-4 text-sm text-gray-800 dark:text-gray-200">
-                      {format(new Date(transaction.transaction_date), 'MMM dd, yyyy', { locale: getDateLocale() })}
-                    </td>
-                    <td className="py-3 px-4">
-                      <div className="flex items-center gap-2">
-                        <div
-                          className="w-3 h-3 rounded-full"
-                          style={{ backgroundColor: transaction.category_color }}
-                        ></div>
-                        <span className="text-gray-800 dark:text-gray-200">{transaction.category_name || t('transactions.uncategorized')}</span>
-                      </div>
-                    </td>
-                    <td className="py-3 px-4 text-gray-600 dark:text-gray-400 hidden sm:table-cell">
-                      {transaction.description || '-'}
-                    </td>
-                    <td className="py-3 px-4">
-                      <span
-                        className={`px-2 py-1 rounded text-xs font-medium ${
-                          transaction.type === 'income'
-                            ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400'
-                            : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400'
-                        }`}
-                      >
-                        {transaction.type}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-right">
-                      <span
-                        className={`font-bold ${
-                          transaction.type === 'income' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
-                        }`}
-                      >
-                        {/* Backend already converted to display_currency, just format */}
-                        {transaction.type === 'income' ? '+' : '-'}{formatCurrency(transaction.amount)}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <button
-                          onClick={() => handleEdit(transaction)}
-                          className="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded transition-colors"
-                        >
-                          <Pencil size={16} />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(transaction.id)}
-                          className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded transition-colors"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            </div>
-
-            {/* Pagination */}
-            {transactions.length > itemsPerPage && (
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-4 pt-4 border-t dark:border-gray-700">
-                <div className="text-sm text-gray-600 dark:text-gray-400">
-                  {t('common.showing')} {(currentPage - 1) * itemsPerPage + 1} - {Math.min(currentPage * itemsPerPage, transactions.length)} {t('common.of')} {transactions.length}
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                    disabled={currentPage === 1}
-                    className="px-4 py-2 border dark:border-gray-700 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                  >
-                    {t('common.previous')}
-                  </button>
-                  <div className="flex items-center gap-2 px-4 py-2 border dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800">
-                    <span className="text-sm font-medium">{currentPage}</span>
-                    <span className="text-sm text-gray-500">/</span>
-                    <span className="text-sm text-gray-500">{Math.ceil(transactions.length / itemsPerPage)}</span>
-                  </div>
-                  <button
-                    onClick={() => setCurrentPage(p => Math.min(Math.ceil(transactions.length / itemsPerPage), p + 1))}
-                    disabled={currentPage >= Math.ceil(transactions.length / itemsPerPage)}
-                    className="px-4 py-2 border dark:border-gray-700 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                  >
-                    {t('common.next')}
-                  </button>
-                </div>
-              </div>
-            )}
-          </>
-        ) : (
-            <div className="text-center py-12">
-              <Wallet className="mx-auto h-16 w-16 text-gray-400 dark:text-gray-500 mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-            {t('transactions.noTransactions')}
-              </h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
-                💡 Start tracking your finances by adding your first transaction. Track income, expenses, and see where your money goes!
-              </p>
-              <button onClick={handleAdd} className="btn btn-primary">
-                <Plus size={18} className="inline mr-2" />
-                {t('transactions.addTransaction')}
+      {/* ── Filter panel ── */}
+      {filterOpen && viewMode === 'transactions' && (
+        <div className="card space-y-3 animate-fade-up">
+          <div className="flex items-center justify-between mb-1">
+            <h3 className="font-semibold text-text-primary dark:text-dark-text-primary">Filter</h3>
+            {hasFilters && (
+              <button onClick={() => setFilters({ type: '', category_id: '', start_date: '', end_date: '' })}
+                className="text-sm text-primary dark:text-primary-dark font-semibold">
+                Tozalash
               </button>
+            )}
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="label">Tur</label>
+              <select className="input" value={filters.type}
+                onChange={e => setFilters({ ...filters, type: e.target.value })}>
+                <option value="">Hammasi</option>
+                <option value="income">Daromad</option>
+                <option value="expense">Xarajat</option>
+              </select>
+            </div>
+            <div>
+              <label className="label">Kategoriya</label>
+              <select className="input" value={filters.category_id}
+                onChange={e => setFilters({ ...filters, category_id: e.target.value })}>
+                <option value="">Hammasi</option>
+                {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="label">Boshlanish sanasi</label>
+              <input type="date" className="input" value={filters.start_date}
+                onChange={e => setFilters({ ...filters, start_date: e.target.value })} />
+            </div>
+            <div>
+              <label className="label">Tugash sanasi</label>
+              <input type="date" className="input" value={filters.end_date}
+                onChange={e => setFilters({ ...filters, end_date: e.target.value })} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Transactions list ── */}
+      {viewMode === 'transactions' && (
+        <div className="card">
+          {loading ? <TxSkeleton /> : paginated.length > 0 ? (
+            <>
+              <div className="divide-y divide-border dark:divide-dark-border">
+                {paginated.map(tx => {
+                  const isIncome = tx.type === 'income';
+                  const dateStr = tx.transaction_date
+                    ? format(new Date(tx.transaction_date), 'dd MMM, yyyy')
+                    : '';
+                  return (
+                    <div key={tx.id}
+                      className="flex items-center gap-3 py-3.5 first:pt-0 last:pb-0 group">
+                      {/* Icon */}
+                      <div className="icon-wrap flex-shrink-0"
+                        style={{ backgroundColor: (tx.category_color || '#6B7280') + '18' }}>
+                        {tx.category_icon
+                          ? <span className="text-lg">{tx.category_icon}</span>
+                          : isIncome
+                            ? <TrendingUp size={18} className="text-income" />
+                            : <TrendingDown size={18} className="text-expense" />
+                        }
+                      </div>
+
+                      {/* Info */}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[15px] font-semibold text-text-primary dark:text-dark-text-primary truncate">
+                          {tx.description || tx.category_name || (isIncome ? 'Daromad' : 'Xarajat')}
+                        </p>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          {tx.category_name && (
+                            <span className="text-xs font-medium text-text-muted dark:text-dark-text-muted">
+                              {tx.category_name}
+                            </span>
+                          )}
+                          {tx.category_name && dateStr && <span className="text-text-muted dark:text-dark-text-muted text-xs">·</span>}
+                          <span className="text-xs text-text-muted dark:text-dark-text-muted">{dateStr}</span>
+                          {tx.is_recurring && (
+                            <span className="badge badge-primary text-[10px]"><Repeat size={10} /> Takroriy</span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Amount + Actions */}
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <span className={`text-[15px] font-bold num-display ${
+                          isIncome ? 'text-income dark:text-income-dark' : 'text-expense dark:text-expense-dark'
+                        }`}>
+                          {isIncome ? '+' : '−'}{formatCurrency(tx.amount)}
+                        </span>
+                        <div className="hidden sm:flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button onClick={() => { setEditingTransaction(tx); setShowModal(true); }}
+                            className="btn-icon-sm btn-ghost">
+                            <Pencil size={14} />
+                          </button>
+                          <button onClick={() => handleDelete(tx.id)}
+                            className="btn-icon-sm btn-ghost text-expense">
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                        {/* Mobile always visible */}
+                        <div className="flex sm:hidden items-center gap-1">
+                          <button onClick={() => { setEditingTransaction(tx); setShowModal(true); }}
+                            className="btn-icon-sm btn-ghost">
+                            <Pencil size={14} />
+                          </button>
+                          <button onClick={() => handleDelete(tx.id)}
+                            className="btn-icon-sm btn-ghost text-expense">
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-between mt-5 pt-4 border-t border-border dark:border-dark-border">
+                  <p className="text-sm text-text-muted dark:text-dark-text-muted">
+                    {(currentPage - 1) * ITEMS + 1}–{Math.min(currentPage * ITEMS, transactions.length)} / {transactions.length}
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                      disabled={currentPage === 1}
+                      className="btn-icon-sm btn-secondary disabled:opacity-40">
+                      <ChevronLeft size={16} />
+                    </button>
+                    <span className="text-sm font-semibold text-text-primary dark:text-dark-text-primary w-12 text-center">
+                      {currentPage} / {totalPages}
+                    </span>
+                    <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                      disabled={currentPage >= totalPages}
+                      className="btn-icon-sm btn-secondary disabled:opacity-40">
+                      <ChevronRight size={16} />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="py-12 flex flex-col items-center text-center">
+              <div className="w-16 h-16 rounded-full bg-surface-2 dark:bg-dark-surface-2 flex items-center justify-center mb-4">
+                <ArrowLeftRight size={24} className="text-text-muted dark:text-dark-text-muted" />
+              </div>
+              <p className="font-semibold text-text-primary dark:text-dark-text-primary mb-1">
+                {hasFilters ? 'Filter bo\'yicha natija yo\'q' : 'Tranzaksiyalar yo\'q'}
+              </p>
+              <p className="text-sm text-text-secondary dark:text-dark-text-secondary max-w-[220px] mb-5">
+                {hasFilters
+                  ? 'Boshqa filter parametrlarini sinab ko\'ring'
+                  : 'Birinchi daromad yoki xarajatingizni qo\'shing'}
+              </p>
+              {!hasFilters && (
+                <button onClick={() => { setEditingTransaction(null); setShowModal(true); }}
+                  className="btn btn-primary btn-sm">
+                  <Plus size={16} /> Tranzaksiya qo'shish
+                </button>
+              )}
             </div>
           )}
         </div>
       )}
 
-      {/* Recurring List - Only show for recurring view */}
+      {/* ── Recurring list ── */}
       {viewMode === 'recurring' && (
-        <div className="space-y-4">
-          {/* Recurring List */}
+        <div className="space-y-3">
           {loading ? (
-            <ListSkeleton items={5} />
+            <div className="card"><TxSkeleton /></div>
           ) : recurringList.length === 0 ? (
-            <div className="card text-center py-12">
-              <Repeat className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500 mb-4" />
-              <p className="text-gray-500 dark:text-gray-400 mb-3">{t('recurring.noRecurring')}</p>
-              <p className="text-sm text-gray-500 dark:text-gray-500 mb-4">
-                💡 Tick "Make Recurring" checkbox when adding transactions
+            <div className="card py-12 flex flex-col items-center text-center">
+              <div className="w-16 h-16 rounded-full bg-surface-2 dark:bg-dark-surface-2 flex items-center justify-center mb-4">
+                <Repeat size={24} className="text-text-muted dark:text-dark-text-muted" />
+              </div>
+              <p className="font-semibold text-text-primary dark:text-dark-text-primary mb-1">Takroriy tranzaksiyalar yo'q</p>
+              <p className="text-sm text-text-secondary dark:text-dark-text-secondary max-w-[220px] mb-5">
+                Tranzaksiya qo'shishda "Takroriy qilish" belgilang
               </p>
-              <button
-                onClick={() => navigate('/recurring')}
-                className="btn btn-primary"
-              >
-                <Plus size={18} className="inline mr-2" />
-                {t('recurring.addRecurring')}
+              <button onClick={() => navigate('/recurring')} className="btn btn-primary btn-sm">
+                <Plus size={16} /> Qo'shish
               </button>
             </div>
           ) : (
-            <div className="space-y-3">
-              {recurringList.map((rec) => (
-                <div key={rec.id} className="card">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className={`px-2 py-1 rounded text-xs font-medium ${
-                          rec.type === 'income'
-                            ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400'
-                            : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400'
-                        }`}>
-                          {t(`transactions.${rec.type}`)}
-                        </span>
-                        <span className="px-2 py-1 rounded text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400">
-                          {t(`recurring.${rec.frequency}`)}
-                        </span>
-                        {rec.is_active ? (
-                          <span className="px-2 py-1 rounded text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400">
-                            ✓ {t('recurring.active')}
-                          </span>
-                        ) : (
-                          <span className="px-2 py-1 rounded text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-400">
-                            ○ {t('recurring.inactive')}
-                          </span>
-                        )}
-                      </div>
-                      <h3 className="text-xl font-bold mb-1">{formatAmount(rec.amount, rec.currency)}</h3>
-                      {rec.category_name && (
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">📁 {rec.category_name}</p>
-                      )}
-                      {rec.description && (
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">{rec.description}</p>
-                      )}
-                      <div className="flex items-center gap-4 text-xs text-gray-600 dark:text-gray-400">
-                        <div className="flex items-center gap-1">
-                          <Calendar size={14} />
-                          <span>{t('recurring.next')}: <span className="font-medium">{new Date(rec.next_occurrence).toLocaleDateString()}</span></span>
-                        </div>
-                        {rec.end_date && <span>• {t('recurring.ends')}: {new Date(rec.end_date).toLocaleDateString()}</span>}
-                      </div>
+            recurringList.map(rec => (
+              <div key={rec.id} className="card">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap gap-1.5 mb-2">
+                      <span className={`badge ${rec.type === 'income' ? 'badge-income' : 'badge-expense'}`}>
+                        {rec.type === 'income' ? 'Daromad' : 'Xarajat'}
+                      </span>
+                      <span className="badge badge-primary">{rec.frequency}</span>
+                      <span className={`badge ${rec.is_active ? 'badge-income' : 'badge-neutral'}`}>
+                        {rec.is_active ? 'Faol' : 'Nofaol'}
+                      </span>
                     </div>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => navigate(`/recurring?edit=${rec.id}`)}
-                        className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-                        title={t('common.edit')}
-                      >
-                        <Pencil size={18} className="text-blue-600 dark:text-blue-400" />
-                      </button>
-                      <button
-                        onClick={async () => {
-                          try {
-                            await api.patch(`/recurring/${rec.id}/toggle`);
-                            toast.success(t('common.success'));
-                            fetchRecurring();
-                          } catch (error) {
-                            toast.error(t('common.error'));
-                          }
-                        }}
-                        className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-                        title={rec.is_active ? 'Deactivate' : 'Activate'}
-                      >
-                        {rec.is_active ? '🟢' : '⚪'}
-                      </button>
-                      <button
-                        onClick={async () => {
-                          if (window.confirm(t('recurring.recurringDeleted'))) {
-                            try {
-                              await api.delete(`/recurring/${rec.id}`);
-                              toast.success(t('recurring.recurringDeleted'));
-                              fetchRecurring();
-                            } catch (error) {
-                              toast.error(t('common.error'));
-                            }
-                          }
-                        }}
-                        className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-                        title={t('common.delete')}
-                      >
-                        <Trash2 size={18} className="text-red-600 dark:text-red-400" />
-                      </button>
-                    </div>
+                    <p className="text-xl font-bold text-text-primary dark:text-dark-text-primary num-display mb-1">
+                      {formatAmount(rec.amount, rec.currency)}
+                    </p>
+                    {rec.category_name && (
+                      <p className="text-sm text-text-secondary dark:text-dark-text-secondary">{rec.category_name}</p>
+                    )}
+                    {rec.description && (
+                      <p className="text-sm text-text-muted dark:text-dark-text-muted">{rec.description}</p>
+                    )}
+                    <p className="text-xs text-text-muted dark:text-dark-text-muted mt-2 flex items-center gap-1">
+                      <Calendar size={12} />
+                      Keyingisi: {new Date(rec.next_occurrence).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <div className="flex gap-1.5">
+                    <button onClick={() => navigate(`/recurring?edit=${rec.id}`)}
+                      className="btn-icon-sm btn-secondary">
+                      <Pencil size={14} />
+                    </button>
+                    <button onClick={async () => {
+                      try { await api.patch(`/recurring/${rec.id}/toggle`); fetchRecurring(); }
+                      catch { toast.error('Xatolik'); }
+                    }} className="btn-icon-sm btn-secondary">
+                      {rec.is_active ? '🟢' : '⚪'}
+                    </button>
+                    <button onClick={async () => {
+                      if (!confirm('O\'chirilsinmi?')) return;
+                      try { await api.delete(`/recurring/${rec.id}`); fetchRecurring(); }
+                      catch { toast.error('Xatolik'); }
+                    }} className="btn-icon-sm btn-ghost text-expense">
+                      <Trash2 size={14} />
+                    </button>
                   </div>
                 </div>
-              ))}
-          </div>
-        )}
-      </div>
+              </div>
+            ))
+          )}
+        </div>
       )}
 
+      {/* ── Modal ── */}
       {showModal && (
         <TransactionModal
           transaction={editingTransaction}
@@ -522,4 +436,3 @@ const Transactions = () => {
 };
 
 export default Transactions;
-

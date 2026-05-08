@@ -3,11 +3,13 @@ import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 import api from '../lib/api';
 import { useCurrency } from '../context/CurrencyContext';
-import { Target, Plus, TrendingUp, Calendar, AlertCircle } from 'lucide-react';
+import { Target, Plus, Calendar, CheckCircle } from 'lucide-react';
 import GoalModal from '../components/GoalModal';
 import GoalCard from '../components/GoalCard';
 import ContributionModal from '../components/ContributionModal';
-import { GoalCardSkeleton } from '../components/LoadingSkeleton';
+import { SegmentedControl } from '../components/ui';
+
+const Skeleton = ({ className }) => <div className={`skeleton ${className}`} />;
 
 const Goals = () => {
   const { t } = useTranslation();
@@ -18,54 +20,24 @@ const Goals = () => {
   const [showContributionModal, setShowContributionModal] = useState(false);
   const [editingGoal, setEditingGoal] = useState(null);
   const [selectedGoal, setSelectedGoal] = useState(null);
-  const [filter, setFilter] = useState('all'); // 'all', 'active', 'completed'
+  const [filter, setFilter] = useState('all');
 
-  useEffect(() => {
-    fetchGoals();
-  }, [filter, currentCurrency]); // Re-fetch when currency changes
+  useEffect(() => { fetchGoals(); }, [filter, currentCurrency]);
 
   const fetchGoals = async () => {
     try {
       setLoading(true);
       const params = filter !== 'all' ? { is_completed: filter === 'completed' } : {};
-      const response = await api.get('/goals', { params });
-      setGoals(Array.isArray(response.data) ? response.data : []);
-    } catch (error) {
-      console.error('❌ Error fetching goals:', error);
-      setGoals([]);
-      if (error.response?.status !== 404) {
-        toast.error(t('goals.failedToLoad'));
-      }
-    } finally {
-      setLoading(false);
-    }
+      const res = await api.get('/goals', { params });
+      setGoals(Array.isArray(res.data) ? res.data : []);
+    } catch { setGoals([]); }
+    finally { setLoading(false); }
   };
 
   const handleDelete = async (id) => {
     if (!window.confirm(t('goals.deleteConfirm'))) return;
-
-    try {
-      await api.delete(`/goals/${id}`);
-      toast.success(t('goals.deleteSuccess'));
-      fetchGoals();
-    } catch (error) {
-      toast.error(t('common.error'));
-    }
-  };
-
-  const handleEdit = (goal) => {
-    setEditingGoal(goal);
-    setShowGoalModal(true);
-  };
-
-  const handleAdd = () => {
-    setEditingGoal(null);
-    setShowGoalModal(true);
-  };
-
-  const handleContribute = (goal) => {
-    setSelectedGoal(goal);
-    setShowContributionModal(true);
+    try { await api.delete(`/goals/${id}`); toast.success(t('goals.deleteSuccess')); fetchGoals(); }
+    catch { toast.error(t('common.error')); }
   };
 
   const handleModalClose = () => {
@@ -76,149 +48,135 @@ const Goals = () => {
     fetchGoals();
   };
 
-  // Calculate overall stats with currency conversion
-  const stats = goals.reduce(
-    (acc, goal) => {
-      const target = convertAmount(parseFloat(goal.target_amount), goal.currency);
-      const current = convertAmount(parseFloat(goal.current_amount), goal.currency);
-      acc.totalTarget += target;
-      acc.totalSaved += current;
-      if (goal.is_completed) acc.completedCount++;
-      return acc;
-    },
-    { totalTarget: 0, totalSaved: 0, completedCount: 0 }
+  const stats = goals.reduce((acc, g) => {
+    acc.totalTarget += convertAmount(parseFloat(g.target_amount), g.currency);
+    acc.totalSaved  += convertAmount(parseFloat(g.current_amount), g.currency);
+    if (g.is_completed) acc.completed++;
+    return acc;
+  }, { totalTarget: 0, totalSaved: 0, completed: 0 });
+
+  const overallPct = stats.totalTarget > 0
+    ? Math.min(100, (stats.totalSaved / stats.totalTarget) * 100)
+    : 0;
+
+  const filtered = goals.filter(g =>
+    filter === 'all' ? true : filter === 'active' ? !g.is_completed : g.is_completed
   );
 
-  const overallProgress = stats.totalTarget > 0 ? (stats.totalSaved / stats.totalTarget) * 100 : 0;
-
-  const filteredGoals = goals.filter(goal => {
-    if (filter === 'all') return true;
-    if (filter === 'active') return !goal.is_completed;
-    if (filter === 'completed') return goal.is_completed;
-    return true;
-  });
+  const SEG = [
+    { value: 'all',       label: 'Hammasi' },
+    { value: 'active',    label: 'Faol' },
+    { value: 'completed', label: 'Bajarilgan' },
+  ];
 
   return (
-    <div className="space-y-4 sm:space-y-6">
-      {/* Header */}
-      <div className="card">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
-          <h1 className="text-2xl sm:text-3xl font-bold dark:text-gray-100 flex items-center gap-2">
-            <Target className="text-blue-600 dark:text-blue-400" />
-            {t('goals.title')}
-          </h1>
-          <button onClick={handleAdd} className="btn btn-primary flex items-center gap-2 w-full sm:w-auto">
-            <Plus size={20} />
-            <span>{t('goals.addGoal')}</span>
-          </button>
-        </div>
+    <div className="space-y-5 animate-fade-up">
 
-        {/* Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-          <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-            <div className="text-xs sm:text-sm text-blue-600 dark:text-blue-400 mb-1">{t('goals.totalGoals')}</div>
-            <div className="text-xl sm:text-2xl font-bold dark:text-gray-100">{goals.length}</div>
-          </div>
-          <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-            <div className="text-xs sm:text-sm text-green-600 dark:text-green-400 mb-1">{t('goals.completed')}</div>
-            <div className="text-xl sm:text-2xl font-bold dark:text-gray-100">{stats.completedCount}</div>
-          </div>
-          <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-            <div className="text-xs sm:text-sm text-purple-600 dark:text-purple-400 mb-1">{t('goals.overallProgress')}</div>
-            <div className="text-xl sm:text-2xl font-bold dark:text-gray-100">{overallProgress.toFixed(1)}%</div>
-          </div>
-        </div>
+      {/* ── Header ── */}
+      <div className="flex items-center justify-between">
+        <h1 className="page-title">{t('goals.title')}</h1>
+        <button onClick={() => { setEditingGoal(null); setShowGoalModal(true); }}
+          className="btn btn-primary btn-sm">
+          <Plus size={18} strokeWidth={2.5} /> {t('goals.addGoal')}
+        </button>
+      </div>
 
-        {/* Filters */}
-        <div className="flex gap-2">
-          <button
-            onClick={() => setFilter('all')}
-            className={`px-4 py-2 rounded-lg transition-colors ${
-              filter === 'all'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-            }`}
-          >
-            {t('common.all')}
-          </button>
-          <button
-            onClick={() => setFilter('active')}
-            className={`px-4 py-2 rounded-lg transition-colors ${
-              filter === 'active'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-            }`}
-          >
-            {t('goals.active')}
-          </button>
-          <button
-            onClick={() => setFilter('completed')}
-            className={`px-4 py-2 rounded-lg transition-colors ${
-              filter === 'completed'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-            }`}
-          >
-            {t('goals.completed')}
-          </button>
+      {/* ── Summary ── */}
+      <div className="grid grid-cols-3 gap-3">
+        <div className="card py-4 text-center">
+          <p className="text-2xl font-bold text-text-primary dark:text-dark-text-primary num-display">{goals.length}</p>
+          <p className="text-xs font-semibold text-text-secondary dark:text-dark-text-secondary mt-1">Jami maqsad</p>
+        </div>
+        <div className="card py-4 text-center">
+          <p className="text-2xl font-bold text-income dark:text-income-dark num-display">{stats.completed}</p>
+          <p className="text-xs font-semibold text-text-secondary dark:text-dark-text-secondary mt-1">Bajarilgan</p>
+        </div>
+        <div className="card py-4 text-center">
+          <p className="text-2xl font-bold text-primary dark:text-primary-dark num-display">{overallPct.toFixed(0)}%</p>
+          <p className="text-xs font-semibold text-text-secondary dark:text-dark-text-secondary mt-1">Umumiy jarayon</p>
         </div>
       </div>
 
-      {/* Goals Grid */}
-      <div className="card">
-        {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-            {[...Array(6)].map((_, i) => <GoalCardSkeleton key={i} />)}
+      {/* Overall progress bar */}
+      {goals.length > 0 && (
+        <div className="card py-4">
+          <div className="flex justify-between items-center mb-2">
+            <p className="text-sm font-semibold text-text-primary dark:text-dark-text-primary">Umumiy progress</p>
+            <p className="text-sm font-bold text-primary dark:text-primary-dark num-display">{overallPct.toFixed(1)}%</p>
           </div>
-        ) : filteredGoals.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-            {filteredGoals.map((goal) => (
-              <GoalCard
-                key={goal.id}
-                goal={goal}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-                onContribute={handleContribute}
-                formatCurrency={formatCurrency}
-                convertAmount={convertAmount}
-                currentCurrency={currentCurrency}
-              />
-            ))}
+          <div className="h-2.5 bg-surface-2 dark:bg-dark-surface-2 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-primary rounded-full transition-all duration-700"
+              style={{ width: `${overallPct}%` }}
+            />
           </div>
-        ) : (
-          <div className="text-center py-12">
-            <Target className="mx-auto h-16 w-16 text-gray-400 dark:text-gray-500 mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{t('goals.noGoals')}</h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4 max-w-md mx-auto">
-              💡 Set savings goals to stay motivated! Track progress towards your dreams: emergency fund, vacation, new car, or house down payment.
+          <div className="flex justify-between mt-2">
+            <p className="text-xs text-text-muted dark:text-dark-text-muted">
+              {formatCurrency(stats.totalSaved)} tejaldi
             </p>
-            <div className="flex flex-wrap justify-center gap-2 mb-6">
-              <span className="px-3 py-1 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-full text-xs">🏠 House</span>
-              <span className="px-3 py-1 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 rounded-full text-xs">✈️ Vacation</span>
-              <span className="px-3 py-1 bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 rounded-full text-xs">🚗 Car</span>
-              <span className="px-3 py-1 bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300 rounded-full text-xs">💼 Emergency</span>
-            </div>
-            <button onClick={handleAdd} className="btn btn-primary">
-              <Plus size={18} className="inline mr-2" />
-              {t('goals.createFirst')}
-            </button>
+            <p className="text-xs text-text-muted dark:text-dark-text-muted">
+              {formatCurrency(stats.totalTarget)} maqsad
+            </p>
           </div>
-        )}
-      </div>
-
-      {/* Modals */}
-      {showGoalModal && (
-        <GoalModal
-          goal={editingGoal}
-          onClose={handleModalClose}
-        />
+        </div>
       )}
 
+      {/* ── Filter ── */}
+      <SegmentedControl options={SEG} value={filter} onChange={setFilter} />
+
+      {/* ── Goals grid ── */}
+      {loading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="card space-y-3">
+              <Skeleton className="h-5 w-32 rounded-xl" />
+              <Skeleton className="h-8 w-48 rounded-xl" />
+              <Skeleton className="h-3 w-full rounded-full" />
+              <Skeleton className="h-4 w-24 rounded-xl" />
+            </div>
+          ))}
+        </div>
+      ) : filtered.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+          {filtered.map(goal => (
+            <GoalCard
+              key={goal.id}
+              goal={goal}
+              onEdit={g => { setEditingGoal(g); setShowGoalModal(true); }}
+              onDelete={handleDelete}
+              onContribute={g => { setSelectedGoal(g); setShowContributionModal(true); }}
+              formatCurrency={formatCurrency}
+              convertAmount={convertAmount}
+              currentCurrency={currentCurrency}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="card py-14 flex flex-col items-center text-center">
+          <div className="w-16 h-16 rounded-full bg-surface-2 dark:bg-dark-surface-2 flex items-center justify-center mb-4">
+            <Target size={26} className="text-text-muted dark:text-dark-text-muted" />
+          </div>
+          <p className="font-semibold text-text-primary dark:text-dark-text-primary mb-2">
+            {filter === 'all' ? 'Maqsadlar yo\'q' : 'Bu bo\'limda maqsad yo\'q'}
+          </p>
+          <p className="text-sm text-text-secondary dark:text-dark-text-secondary max-w-[240px] mb-6">
+            Uy, avtomobil, ta'til — moliyaviy maqsadlaringizni belgilab, tejashni boshlang
+          </p>
+          <div className="flex flex-wrap justify-center gap-2 mb-6">
+            {['🏠 Uy', '✈️ Ta\'til', '🚗 Avtomobil', '🛡️ Zaxira fond'].map(l => (
+              <span key={l} className="badge badge-neutral">{l}</span>
+            ))}
+          </div>
+          <button onClick={() => { setEditingGoal(null); setShowGoalModal(true); }}
+            className="btn btn-primary btn-sm">
+            <Plus size={16} /> Maqsad qo'shish
+          </button>
+        </div>
+      )}
+
+      {showGoalModal && <GoalModal goal={editingGoal} onClose={handleModalClose} />}
       {showContributionModal && selectedGoal && (
-        <ContributionModal
-          goal={selectedGoal}
-          onClose={handleModalClose}
-        />
+        <ContributionModal goal={selectedGoal} onClose={handleModalClose} />
       )}
     </div>
   );

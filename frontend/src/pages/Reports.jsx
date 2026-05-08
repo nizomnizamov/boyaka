@@ -238,55 +238,26 @@ const Reports = () => {
   const trendsConverted = trends;
 
   return (
-    <div className="space-y-4 sm:space-y-6">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold">{t('reports.title')}</h1>
-          {/* Tabs */}
-          <div className="flex gap-1 mt-3">
-            <button
-              onClick={() => setActiveTab('reports')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                activeTab === 'reports'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-              }`}
-            >
-              <FileText size={15} /> {t('reports.title')}
-            </button>
-            <button
-              onClick={() => setActiveTab('analytics')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                activeTab === 'analytics'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-              }`}
-            >
-              <Activity size={15} /> {t('nav.analytics')}
-            </button>
-          </div>
-        </div>
-        
+    <div className="space-y-5 animate-fade-up">
+      <div className="flex items-center justify-between gap-3">
+        <h1 className="page-title">{t('reports.title')}</h1>
+
         {/* Export Dropdown */}
-        <div className="relative w-full sm:w-auto">
-          <button 
-            onClick={() => setExportMenuOpen(!exportMenuOpen)} 
-            className="btn btn-primary flex items-center gap-2 w-full sm:w-auto justify-center"
+        <div className="relative">
+          <button
+            onClick={() => setExportMenuOpen(!exportMenuOpen)}
+            className="btn btn-secondary btn-sm flex items-center gap-2"
           >
-            <Download size={20} />
-            <span>Export</span>
-            <svg className={`w-4 h-4 transition-transform ${exportMenuOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
+            <Download size={16} /> Export
           </button>
-          
+
           {exportMenuOpen && (
             <>
               <div className="fixed inset-0 z-10" onClick={() => setExportMenuOpen(false)} />
-              <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 z-20">
+              <div className="absolute right-0 mt-2 w-44 bg-white dark:bg-dark-surface rounded-2xl shadow-soft-lg border border-border dark:border-dark-border z-20 overflow-hidden">
                 <button
                   onClick={handleExport}
-                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors rounded-t-lg"
+                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-surface-2 dark:hover:bg-dark-surface-2 transition-colors text-sm font-medium text-text-primary dark:text-dark-text-primary"
                 >
                   <FileSpreadsheet size={20} className="text-green-600 dark:text-green-400" />
                   <div className="text-left">
@@ -310,74 +281,68 @@ const Reports = () => {
         </div>
       </div>
 
+      {/* Tabs */}
+      <div className="flex gap-1 p-1 bg-surface-2 dark:bg-dark-surface-2 rounded-2xl">
+        {[['reports', 'Hisobotlar'], ['analytics', 'Tahlil']].map(([v, l]) => (
+          <button key={v} onClick={() => setActiveTab(v)}
+            className={`flex-1 py-2 rounded-xl text-sm font-semibold transition-all ${
+              activeTab === v
+                ? 'bg-white dark:bg-dark-surface-3 text-text-primary dark:text-dark-text-primary shadow-soft'
+                : 'text-text-secondary dark:text-dark-text-secondary'
+            }`}>{l}</button>
+        ))}
+      </div>
+
       {/* Analytics Tab */}
       {activeTab === 'analytics' && <Analytics />}
 
       {activeTab === 'reports' && <>
 
-      {/* Date Range Selector */}
+      {/* Date Range */}
       <div className="card">
-        <div className="flex items-center gap-2 mb-4">
-          <Calendar size={20} className="text-gray-600 dark:text-gray-400" />
-          <h2 className="text-base sm:text-lg font-semibold dark:text-gray-100">{t('reports.dateRange')}</h2>
+        <div className="flex items-center gap-2 mb-3">
+          <Calendar size={18} className="text-text-secondary dark:text-dark-text-secondary" />
+          <h2 className="font-semibold text-text-primary dark:text-dark-text-primary">{t('reports.dateRange')}</h2>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+        <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              {t('reports.startDate')}
-            </label>
-            <input
-              type="date"
-              value={dateRange.start_date}
-              onChange={(e) => setDateRange({ ...dateRange, start_date: e.target.value })}
-              className="input"
-            />
+            <label className="label">{t('reports.startDate')}</label>
+            <input type="date" value={dateRange.start_date}
+              onChange={e => setDateRange({ ...dateRange, start_date: e.target.value })}
+              className="input" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              {t('reports.endDate')}
-            </label>
-            <input
-              type="date"
-              value={dateRange.end_date}
-              onChange={(e) => setDateRange({ ...dateRange, end_date: e.target.value })}
-              className="input"
-            />
+            <label className="label">{t('reports.endDate')}</label>
+            <input type="date" value={dateRange.end_date}
+              onChange={e => setDateRange({ ...dateRange, end_date: e.target.value })}
+              className="input" />
           </div>
         </div>
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
-        <div className="card bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 border-green-200 dark:border-green-800">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">{t('reports.totalIncome')}</p>
-            <TrendingUp className="text-green-600 dark:text-green-400" size={20} />
-          </div>
-          <p className="text-2xl sm:text-3xl font-bold text-green-600 dark:text-green-400 break-all">{formatCurrency(income)}</p>
+      <div className="grid grid-cols-3 gap-3">
+        <div className="card py-4 text-center">
+          <TrendingUp size={18} className="text-income dark:text-income-dark mx-auto mb-2" />
+          <p className="text-xs font-semibold text-text-secondary dark:text-dark-text-secondary mb-1">{t('reports.totalIncome')}</p>
+          <p className="text-lg font-bold text-income dark:text-income-dark num-display">{formatCurrency(income)}</p>
         </div>
-
-        <div className="card bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20 border-red-200 dark:border-red-800">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">{t('reports.totalExpenses')}</p>
-            <TrendingDown className="text-red-600 dark:text-red-400" size={20} />
-          </div>
-          <p className="text-2xl sm:text-3xl font-bold text-red-600 dark:text-red-400 break-all">{formatCurrency(expense)}</p>
+        <div className="card py-4 text-center">
+          <TrendingDown size={18} className="text-expense dark:text-expense-dark mx-auto mb-2" />
+          <p className="text-xs font-semibold text-text-secondary dark:text-dark-text-secondary mb-1">{t('reports.totalExpenses')}</p>
+          <p className="text-lg font-bold text-expense dark:text-expense-dark num-display">{formatCurrency(expense)}</p>
         </div>
-
-        <div className={`card bg-gradient-to-br ${balance >= 0 ? 'from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-blue-200 dark:border-blue-800' : 'from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 border-orange-200 dark:border-orange-800'}`}>
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">{t('reports.netBalance')}</p>
-          </div>
-          <p className={`text-2xl sm:text-3xl font-bold break-all ${balance >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-orange-600 dark:text-orange-400'}`}>
-            {balance >= 0 ? '+' + formatCurrency(balance) : '-' + formatCurrency(Math.abs(balance))}
+        <div className="card py-4 text-center">
+          <p className="text-xs font-semibold text-text-secondary dark:text-dark-text-secondary mb-1 mt-7">{t('reports.netBalance')}</p>
+          <p className={`text-lg font-bold num-display ${balance >= 0 ? 'text-income dark:text-income-dark' : 'text-expense dark:text-expense-dark'}`}>
+            {balance >= 0 ? '+' : '−'}{formatCurrency(Math.abs(balance))}
           </p>
         </div>
       </div>
 
       {/* Monthly Trends */}
       <div className="card">
-        <h2 className="text-lg sm:text-xl font-bold mb-4">{t('reports.monthlyTrends')}</h2>
+        <h2 className="section-title mb-4">{t('reports.monthlyTrends')}</h2>
         <ResponsiveContainer width="100%" height={300}>
           <LineChart data={trendsConverted}>
             <CartesianGrid strokeDasharray="3 3" />
@@ -392,10 +357,10 @@ const Reports = () => {
         </ResponsiveContainer>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Income Breakdown */}
         <div className="card">
-          <h2 className="text-lg sm:text-xl font-bold mb-4">{t('reports.incomeByCategory')}</h2>
+          <h2 className="section-title mb-4">{t('reports.incomeByCategory')}</h2>
           {incomeByCategory?.length > 0 ? (
             <>
               <ResponsiveContainer width="100%" height={250}>
@@ -440,7 +405,7 @@ const Reports = () => {
 
         {/* Expense Breakdown */}
         <div className="card">
-          <h2 className="text-lg sm:text-xl font-bold mb-4">{t('reports.expensesByCategory')}</h2>
+          <h2 className="section-title mb-4">{t('reports.expensesByCategory')}</h2>
           {expenseByCategory?.length > 0 ? (
             <>
               <ResponsiveContainer width="100%" height={250}>
