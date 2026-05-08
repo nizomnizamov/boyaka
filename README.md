@@ -1,421 +1,326 @@
-# 🌟 Aurora Ledger
+# 🟦 Boyaka — Shaxsiy Moliya Boshqaruvi
 
-<div align="center">
+> Minimal va premium dizayndagi shaxsiy moliyaviy ilova. Xarajat va daromadlarni kuzating, byudjet tuzing, maqsadlar belgilang — hammasi bir joyda.
 
-**Modern Personal Finance Management Application**
-
-Track expenses • Manage budgets • Analyze finances • Multi-currency support
-
-[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE)
-[![Live Demo](https://img.shields.io/badge/Demo-Online-blue.svg)](https://aurora-ledger.vercel.app)
-
-[🚀 Live Demo](https://aurora-ledger.vercel.app) • [📖 Documentation](#-features) • [🤝 Contributing](#-contributing)
-
-</div>
+[![PWA Ready](https://img.shields.io/badge/PWA-Ready-blue?logo=pwa)](https://web.dev/progressive-web-apps/)
+[![Android](https://img.shields.io/badge/Android-Capacitor-green?logo=android)](https://capacitorjs.com/)
+[![React](https://img.shields.io/badge/React-18-blue?logo=react)](https://reactjs.org/)
+[![Vite](https://img.shields.io/badge/Vite-5-purple?logo=vite)](https://vitejs.dev/)
 
 ---
 
-## 💡 About
+## 📱 Imkoniyatlar
 
-**Aurora Ledger** is a modern, feature-rich personal finance management application that helps you take complete control of your financial life. Built with cutting-edge web technologies, it offers an intuitive interface for tracking expenses, managing budgets, and analyzing your financial health.
-
-### ✨ Why Aurora Ledger?
-
-- 🎯 **Easy to Use** - Clean, intuitive interface designed for everyone
-- 🔒 **Privacy First** - Your financial data stays secure and private
-- 🌐 **Global Support** - 29+ currencies with real-time exchange rates
-- 📊 **Powerful Analytics** - Visualize spending patterns and trends
-- 💯 **100% Free** - Open source and deployed on free-tier services
-- 📱 **Fully Responsive** - Perfect experience on desktop, tablet, and mobile
-
----
-
-## 📊 Features
-
-### � Dashboard & Insights
-- 📈 **Financial Overview** - Complete snapshot of your finances
-- 📅 **Week-over-Week** - Income & expense comparison with % change
-- 💰 **Monthly Summary** - Total income, expense, savings, savings rate
-- 🏆 **Top Categories** - Top 5 spending categories with totals
-- 💎 **Net Worth** - Goals saved + budget remaining
-- ❤️ **Financial Health Score** - Algorithm-based 0-100 score:
-  - 40% Savings Score (based on savings rate)
-  - 30% Budget Score (% of budgets not exceeded)
-  - 30% Goals Score (average goal completion)
-- 🔔 **Recent Activity** - Last 5 transactions, upcoming recurring, goals near deadline
-- 💱 **Multi-Currency** - All amounts auto-converted to display currency
-- 🔄 **Real-time Updates** - Auto-refresh on currency change
-
-### �💰 Transaction Management
-- ✅ **Income & Expense Tracking** - Record all your financial activities
-- 🏷️ **Smart Categorization** - Organize with custom categories and colors
-- 📝 **Detailed Notes** - Add descriptions and context to every transaction
-- 🔍 **Advanced Filters** - Search by date, type, category, and amount
-- ✏️ **Quick Edit** - Modify or delete transactions anytime
-- 📄 **Smart Pagination** - Browse through transactions 10 items at a time
-- 💱 **Multi-Currency Transactions** - Record in any currency with auto-conversion
-
-### 🔁 Recurring Transactions
-- ⏰ **Automated Scheduling** - Set up daily, weekly, monthly, or yearly recurring transactions
-- 🎯 **Smart Execution** - Auto-creates transactions on scheduled dates (daily at 00:05 AM)
-- 📅 **Flexible Timing** - Customize start date and optional end date
-- ✏️ **Easy Management** - Edit or delete recurring schedules anytime
-- 🔔 **Active Tracking** - Monitor upcoming and past recurring transactions
-- 💰 **Budget Integration** - Recurring expenses automatically tracked in budgets
-- 📊 **Integrated View** - View/manage from Transactions page via tab toggle
-- ✅ **Quick Add** - Checkbox "Make Recurring" in transaction modal
-- 🎨 **Dual Workflow** - Quick checkbox or full form page
-
-### 🎯 Saving Goals
-- 💰 **Target Setting** - Create goals with target amounts and deadlines
-- 📊 **Progress Tracking** - Visual progress bars and percentage completion
-- 🏆 **Priority Levels** - Mark goals as low, medium, or high priority
-- 🎨 **Custom Icons** - Choose from 15+ goal icons (house, car, vacation, etc.)
-- 💸 **Contribution System** - Add funds or withdraw from goals
-- 📝 **Transaction Linking** - Optionally link contributions to transactions
-- 📈 **Overall Statistics** - Track total saved, goals completed, and overall progress
-- 🎯 **Goal Filtering** - View active, completed, or all goals
-- 💱 **Multi-Currency** - Set goals in any currency with auto-conversion
-
-### 📈 Budget Management
-- 🎯 **Monthly Budgets** - Set spending limits per category
-- 📊 **Visual Progress** - Beautiful progress bars and indicators
-- ⚡ **Auto Tracking** - Spending calculated automatically
-- 🔔 **Smart Alerts** - Warnings at 80% and 100% thresholds
-- 🗓️ **Flexible Views** - Monthly and yearly budget planning
-- 💱 **Multi-Currency Input** - Create budgets in any currency
-- ✏️ **Easy Editing** - Modify existing budgets anytime
-
-### 🧠 Smart Budgets (AI-Powered)
-- 💡 **Auto Suggestions** - Budget recommendations based on 3-month spending history
-- 📊 **Confidence Levels** - High/Medium/Low confidence based on data availability
-- 📈 **Statistical Analysis** - Average, min, max spending per category
-- 🔄 **Budget Rollover** - Carry over unused budget to next month
-- 📝 **Budget Templates** - Pre-built allocation rules:
-  - **50/30/20 Rule** - 50% Needs, 30% Wants, 20% Savings
-  - **60/20/20 Rule** - 60% Living, 20% Savings, 20% Discretionary
-  - **70/20/10 Rule** - 70% Living, 20% Savings, 10% Fun
-  - **Zero-Based** - Allocate every dollar to a category
-- 🎯 **Smart Buffer** - Auto-adds 10% safety margin to suggestions
-- 💱 **Multi-Currency** - All suggestions in your preferred currency
-
-### 🤖 AI & Automation
-- 🏷️ **Smart Categorization** - Auto-suggest categories based on transaction descriptions
-- 📚 **Learning System** - Learns from your past transaction patterns
-- 🔍 **Keyword Matching** - 12+ category templates with 200+ keywords
-- 📊 **Spending Insights** - Intelligent analysis of your spending patterns:
-  - Category trends and transaction averages
-  - Day-of-week spending patterns  
-  - Monthly income/expense/savings trends
-  - Unusual spending detection (transactions > 2x average)
-  - Automated insights generation
-- 💡 **Budget Recommendations** - AI-powered budget adjustments:
-  - **Increase** suggestions for over-budget categories
-  - **Decrease** suggestions for under-utilized budgets
-  - **Create** suggestions for unbudgeted categories (based on 3-month average)
-  - **Perfect** acknowledgment for well-managed budgets (90-100% usage)
-- 📈 **Confidence Scoring** - High/Medium/Low confidence levels for all suggestions
-- 🎯 **Priority Ranking** - Recommendations sorted by urgency
-
-### 📉 Advanced Reports & Analytics
-- 📊 **Income vs Expense** - Track your financial health over time
-- 🥧 **Category Breakdown** - See where your money goes (pie charts)
-- 📊 **Monthly Comparison** - Bar charts for trend analysis
-- 📈 **6-Month Trends** - Identify patterns in your spending
-- 💾 **Export Data** - Download reports as CSV
-- 📄 **PDF Export** - Professional reports with charts (jsPDF)
-- 🔮 **Forecasting** - Linear regression predictions for next month
-- 📊 **Trend Analysis API** - Income/expense trends with 6-month history
-- 🎯 **Anomaly Detection** - Identify unusual spending (>2x category average)
-- 📅 **Year-over-Year** - Compare current vs previous year spending
-- ⚡ **Spending Velocity** - Daily spending rate over 30 days
-- 🔁 **Pattern Recognition** - Detect recurring spending behaviors
-- 💱 **Multi-Currency Analytics** - All charts support currency conversion
-
-### 🌐 Internationalization (i18n)
-- 🌍 **10 Languages** - English, Vietnamese, Chinese, German, Spanish, French, Japanese, Korean, Portuguese, Russian
-- 🔄 **Live Switching** - Change language instantly without refresh
-- 📱 **Fully Translated** - All UI elements, messages, and notifications
-- 🎯 **Context-Aware** - Proper translations for technical terms
-- 💰 **Currency Localization** - Amounts formatted per language/region
-
-### 👨‍👩‍👧‍👦 Family & Group Sharing (NEW!)
-- 🏠 **Family Management** - Create and manage family groups
-- 👥 **Member Roles** - 4-tier permission system (Head/Manager/Contributor/Observer)
-- 📧 **Email Invitations** - Send invites by email with accept/decline
-- 🎟️ **Smart Invite Codes** - Generate shareable codes to join family groups
-  - 👔 **Role Selection** - Choose role (Manager/Contributor/Observer) when creating code
-  - ♾️ **Unlimited options** - 0 or empty = no expiry, unlimited uses
-  - 📅 Customizable expiry dates (days) or permanent links
-  - 👥 Set usage limits or allow unlimited joins
-  - 🔗 Copy code or full join link with one click
-  - 📊 Track code usage and deactivate anytime
-  - ✉️ No email required - perfect for quick sharing
-  - 🔄 Auto-join from URL - Click link to join instantly
-- 💰 **Shared Budgets** - Collaborative budget planning and tracking
-- 🎯 **Shared Goals** - Family savings goals with contributions
-- 💸 **Expense Splitting** - Split bills by percentage or fixed amount
-- 📊 **Contribution Tracking** - Monitor who paid what
-- 🔐 **Role-Based Permissions** - Granular access control per role
-- 💱 **Multi-Currency** - Family budgets in any currency
-- 🗑️ **Family Control** - Leave, transfer ownership, or delete family
-
-### 🎨 User Experience
-- 🌗 **Dark/Light Mode** - Toggle between themes instantly
-- 📱 **Fully Responsive** - Perfect on desktop, tablet, and mobile
-- ⚡ **Fast Performance** - Optimized rendering with React Query caching (5min)
-- 🚀 **Lazy Loading** - Code splitting for 40-50% faster initial load
-- 🔄 **Instant Page Switches** - No re-loading thanks to smart caching
-- 🎯 **Intuitive UI** - Clean, modern interface with smooth animations
-- 📊 **Integrated Features** - Related features in single pages (Transactions + Recurring)
-- 🔍 **Smart Search** - Find anything quickly with filters
-- 📈 **Data Visualization** - Beautiful charts and progress indicators
-- 💾 **Offline First** - Cache strategy reduces API calls by 80%
-
-### 🌍 Multi-Currency Support
-- 💱 **29+ Currencies** - Support for all major global currencies
-- 🔄 **Real-Time Rates** - Automatic exchange rate updates
-- 🎯 **Smart Conversion** - Accurate cross-currency calculations
-- 💰 **Format Aware** - Currency symbols and decimal places
-- ⚡ **24h Caching** - Fast performance with rate caching
-- ✅ **Bug-Free** - No double conversion issues (audited Nov 4, 2025)
-
-### 🔐 Security & Authentication
-- 🔒 **Bcrypt Encryption** - Military-grade password hashing
-- 🎫 **JWT Tokens** - Secure stateless authentication (30-day expiry)
-- 🗑️ **Auto Token Cleanup** - Expired tokens automatically removed
-- 🛡️ **SQL Protection** - Parameterized queries prevent injection
-- 🔐 **HTTPS Only** - All data encrypted in transit
-- 👤 **Data Privacy** - Complete isolation between user accounts
-- 🌐 **CORS Security** - Restricted API access
-- 🔑 **OAuth Integration** - Login with Google (password optional)
-- 👨‍💼 **Role-Based Access** - Admin, moderator, and user roles
-
-### 👨‍💼 Admin Features
-- 📊 **User Management** - View all users with pagination (10 users/page)
-- 📈 **Analytics Dashboard** - Track total users, transactions, categories, budgets, goals
-- �️ **User Details Modal** - Click to view comprehensive user information:
-  - Account info (email, name, role, currency, registration method, joined date)
-  - Statistics (transactions, categories, budgets, goals, recurring count)
-  - Family memberships with role badges (Head/Manager/Contributor/Observer)
-  - Family members list with expandable details
-- 🔄 **Role Management** - Toggle user roles (admin/moderator/user)
-- � **Password Reset** - Reset any user's password
-- 🗑️ **User Deletion** - Remove users with confirmation
-- �🔐 **Access Control** - Admin and moderator roles with restricted access
-- 🌐 **Multi-language** - All admin features translated to 10 languages
+- 💰 Daromad va xarajat kuzatuvi
+- 📊 Oylik byudjet rejalashtirish
+- 🎯 Moliyaviy maqsadlar
+- 📖 Qarz daftari
+- 📈 Hisobotlar va grafik tahlil
+- 👨‍👩‍👧 Oilaviy byudjet
+- 🌍 29+ valyuta qo'llab-quvvatlash
+- 🌙 Dark mode
+- 📲 PWA — uy ekraniga o'rnatish
+- 🤖 Android native app (Capacitor)
 
 ---
 
-## 🔐 Security
+## 🏗️ Tech Stack
 
-- 🔒 **Password Encryption** - Bcrypt hashing with 10 salt rounds
-- 🎫 **JWT Authentication** - Secure token-based authentication (30-day expiry)
-- 🗑️ **Auto Token Management** - Expired tokens automatically cleaned up
-- 🛡️ **SQL Injection Protection** - Parameterized database queries
-- 🔐 **HTTPS Only** - SSL/TLS encryption for all connections
-- 👤 **Data Isolation** - Complete user data privacy
-- 🌐 **CORS Protection** - Restricted to allowed origins
-
----
-
-## 🌍 Supported Currencies
-
-**29 major world currencies** with real-time exchange rates updated daily:
-
-### 🌎 Americas
-`USD` US Dollar • `CAD` Canadian Dollar • `BRL` Brazilian Real • `MXN` Mexican Peso
-
-### 🌍 Europe
-`EUR` Euro • `GBP` British Pound • `CHF` Swiss Franc • `SEK` Swedish Krona • `NOK` Norwegian Krone • `DKK` Danish Krone • `PLN` Polish Zloty • `RUB` Russian Ruble • `TRY` Turkish Lira
-
-### 🌏 Asia-Pacific
-`VND` Vietnamese Dong • `JPY` Japanese Yen • `CNY` Chinese Yuan • `KRW` Korean Won • `THB` Thai Baht • `SGD` Singapore Dollar • `MYR` Malaysian Ringgit • `IDR` Indonesian Rupiah • `PHP` Philippine Peso • `INR` Indian Rupee • `HKD` Hong Kong Dollar • `AUD` Australian Dollar • `NZD` New Zealand Dollar
-
-### 🌍 Middle East & Africa
-`AED` UAE Dirham • `SAR` Saudi Riyal • `ZAR` South African Rand
+| Qatlam       | Texnologiya                           |
+|--------------|---------------------------------------|
+| Frontend     | React 18 + Vite 5                     |
+| Styling      | Tailwind CSS (custom design system)   |
+| State        | TanStack Query v5                     |
+| i18n         | i18next                               |
+| Charts       | Recharts                              |
+| Backend      | Node.js + Express                     |
+| Database     | PostgreSQL                            |
+| Auth         | JWT + Google OAuth                    |
+| Mobile       | Capacitor (Android)                   |
+| PWA          | vite-plugin-pwa + Workbox             |
 
 ---
 
-## 🌐 Deployment Platforms
+## 🚀 Local Development
 
-**✨ This project is 100% FREE - deployed using free-tier services:**
+### Talablar
+- Node.js 18+
+- PostgreSQL 14+
+- npm 9+
 
-### 🎯 Currently Using (FREE Tier):
+### 1. Clone va setup
 
-#### Frontend Hosting
-- **[Vercel](https://vercel.com)** - FREE tier
-  - ✅ Unlimited bandwidth
-  - ✅ Global CDN
-  - ✅ Auto SSL/HTTPS
-  - ✅ Instant deploys from GitHub
+```bash
+git clone https://github.com/your-org/boyaka.git
+cd boyaka
+```
 
-#### Backend Hosting  
-- **[Render](https://render.com)** - FREE tier
-  - ✅ 750 hours/month (enough for 24/7 with 1 service)
-  - ⚠️ Sleeps after 15 min inactivity (use UptimeRobot to prevent)
-  - ✅ Auto deploy from GitHub
-  - ✅ Environment variables support
+### 2. Backend
 
-#### Database Hosting
-- **[Neon](https://neon.tech)** - FREE tier
-  - ✅ 0.5GB storage
-  - ✅ Serverless PostgreSQL
-  - ✅ Auto-scaling
-  - ⚠️ Pauses after 7 days inactivity (auto-resumes)
+```bash
+cd backend
+cp .env.example .env
+# .env faylini to'ldiring (DATABASE_URL, JWT_SECRET, va boshqalar)
+npm install
+npm run migrate
+npm run dev
+```
 
-#### Monitoring (Keep Backend Alive)
-- **[UptimeRobot](https://uptimerobot.com)** - FREE tier
-  - ✅ Ping backend every 5 minutes
-  - ✅ Prevents Render from sleeping
-  - ✅ 50 monitors free
-  - ✅ Email alerts on downtime
+Backend `http://localhost:5000` da ishlaydi.
 
-#### API Services
-- **[ExchangeRate-API](https://www.exchangerate-api.com/)** - FREE tier
-  - ✅ 1,500 requests/month
-  - ✅ 29+ currencies support
-  - ✅ Daily rate updates
+### 3. Frontend
 
----
+```bash
+cd frontend
+cp .env.example .env
+# .env faylida VITE_API_URL=http://localhost:5000 bo'lishi kerak
+npm install
+npm run dev
+```
 
-### 💡 Alternative Free Platforms (If needed)
-
-**Frontend:**
-- [Netlify](https://netlify.com) - 100GB bandwidth/month
-- [Cloudflare Pages](https://pages.cloudflare.com) - Unlimited bandwidth
-- [GitHub Pages](https://pages.github.com) - Free static hosting
-
-**Backend:**
-- [Railway](https://railway.app) - $5 free credits/month
-- [Fly.io](https://fly.io) - 3 VMs free
-- [Cyclic](https://cyclic.sh) - Serverless Node.js
-
-**Database:**
-- [Supabase](https://supabase.com) - 500MB storage, 2GB transfer
-- [ElephantSQL](https://elephantsql.com) - 20MB free
-- [Railway](https://railway.app) - PostgreSQL included
+Frontend `http://localhost:5173` da ishlaydi.
 
 ---
 
-### ⚡ Pro Tips for Free Tier:
+## 🏭 Production Build
 
-1. **Prevent Backend Sleep:**
-   - Use UptimeRobot to ping every 5 minutes
-   - Or upgrade to Render Starter ($7/month)
+```bash
+cd frontend
+npm run build
+```
 
-2. **Optimize Database:**
-   - Neon free tier is generous (0.5GB)
-   - Export data regularly (CSV export feature included)
-   - Upgrade to Pro if needed ($19/month)
+Build output: `frontend/dist/`
 
-3. **Cost Breakdown:**
-   ```
-   Current: $0/month (100% FREE) ✅
-   Optional: $7-12/month (Remove all limitations)
-   ```
-   
----
-
-## 🛠️ Built With
-
-### Frontend Technologies
-- **[React 18](https://reactjs.org/)** - Modern UI library with hooks
-- **[React Query](https://tanstack.com/query/)** - Powerful data synchronization & caching
-- **[Vite](https://vitejs.dev/)** - Lightning-fast build tool and dev server
-- **[Tailwind CSS](https://tailwindcss.com/)** - Utility-first CSS framework
-- **[Recharts](https://recharts.org/)** - Composable charting library
-- **[React Router](https://reactrouter.com/)** - Declarative routing for React
-- **[Axios](https://axios-http.com/)** - Promise-based HTTP client
-- **[React i18next](https://react.i18next.com/)** - Internationalization framework
-- **[jsPDF](https://github.com/parallax/jsPDF)** - PDF generation for reports
-
-### Backend Technologies
-- **[Node.js v22](https://nodejs.org/)** - JavaScript runtime environment
-- **[Express](https://expressjs.com/)** - Fast, minimalist web framework
-- **[PostgreSQL](https://www.postgresql.org/)** - Powerful relational database (20+ tables)
-- **[JWT](https://jwt.io/)** - JSON Web Token authentication
-- **[Bcrypt](https://github.com/kelektiv/node.bcrypt.js)** - Password hashing library
-- **[Passport.js](https://www.passportjs.org/)** - Authentication middleware
-- **[Node-cron](https://github.com/node-cron/node-cron)** - Task scheduler for automation
-- **[Resend](https://resend.com/)** - Email delivery service (100/day free)
-
-### External APIs & Services
-- **[ExchangeRate-API](https://www.exchangerate-api.com/)** - Real-time currency conversion (1,500 requests/month free)
-- **[Vercel](https://vercel.com/)** - Frontend hosting with global CDN
-- **[Render](https://render.com/)** - Backend hosting with auto-deploy
-- **[Neon](https://neon.tech/)** - Serverless PostgreSQL database
+Preview:
+```bash
+npm run preview
+```
 
 ---
 
-## 📋 Recent Updates
+## 🌐 Deployment
 
-### November 4, 2025 - Quality & Cleanup
-- ✅ **Fixed Double Conversion Bug** - Transactions and Dashboard now show correct amounts
-  - Issue: Currency amounts were converted twice (backend + frontend)
-  - Fix: Use `formatCurrency()` instead of `formatAmount()` when backend already converts
-  - Audit: All 8 pages verified, comprehensive documentation created
-- ✅ **Code Cleanup** - Removed 7 unnecessary files
-  - Deleted test/debug scripts with hardcoded credentials
-  - Removed dangerous production cleanup scripts
-  - Cleaned up console.log debug statements
-  - Removed unused imports and debug UI elements
-- ✅ **Documentation** - Created comprehensive audit reports
-  - `DOUBLE_CONVERSION_AUDIT_2025-11-04.md` - Complete analysis
-  - `CLEANUP_SUMMARY_2025-11-04.md` - Cleanup documentation
-- 🎯 **Result**: Production-ready, secure, clean codebase
+### Vercel (Tavsiya etiladi)
 
-### November 3, 2025 - Major Update
-- 🎨 **UX Enhancements** - Loading skeletons, smooth animations, keyboard shortcuts
-- 🚀 **Performance** - Lazy loading reduced initial bundle by 40-50%
-- 🎟️ **Smart Invites** - Unlimited invite codes with role selection
-- 🔁 **Recurring Integration** - Merged into Transactions page
-- 🔐 **Auth Improvements** - 30-day JWT tokens with auto-cleanup
-- 🌐 **i18n Complete** - All features translated to 10 languages
+1. Vercel'da yangi project yarating
+2. Root directory: `.` (loyiha root)
+3. Build Command: `cd frontend && npm install && npm run build`
+4. Output Directory: `frontend/dist`
+5. Environment variables:
 
----
+| Variable      | Qiymat                                        |
+|---------------|-----------------------------------------------|
+| `VITE_API_URL`| `https://your-backend.onrender.com`           |
 
-## 🤝 Contributing
+`vercel.json` allaqachon sozlangan (SPA routing va security headers bilan).
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+### Netlify
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+```bash
+# Root'da netlify.toml tayyor
+# Netlify UI'da:
+#   Base directory: frontend
+#   Build command: npm run build
+#   Publish directory: dist
+```
+
+### Backend (Render yoki Railway)
+
+1. Render.com'da yangi Web Service yarating
+2. Root: `backend/`
+3. Build: `npm install`
+4. Start: `npm start`
+5. Environment variables ni `.env.example` asosida to'ldiring
 
 ---
 
-## 📝 License
+## 📲 PWA (Progressive Web App)
 
-This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.
+Boyaka PWA sifatida o'rnatish mumkin!
+
+### Fayllar
+| Fayl | Joyi |
+|------|------|
+| Manifest | `frontend/public/manifest.webmanifest` (build vaqtida yaratiladi) |
+| Icons | `frontend/public/icons/` |
+| Service Worker | `frontend/dist/sw.js` (build vaqtida yaratiladi) |
+| Offline sahifa | `frontend/public/offline.html` |
+
+### Telefonda o'rnatish
+1. Chrome/Safari'da saytni oching
+2. "Bosh ekranga qo'shish" tugmasini bosing
+3. App avtomatik o'rnatiladi
+
+### 🎨 Ikonlarni almashtirish
+Hozir `public/icons/` da **placeholder** ikonalar bor (SVG placeholder).
+
+Final logo tayyor bo'lganda:
+1. `public/icons/source-icon.svg` fayliga yangi logoni joylang (1024×1024, kvadrat)
+2. `node scripts/generate-icons.js` ni ishga tushiring (sharp kerak)
+3. Yoki onlayn: [realfavicongenerator.net](https://realfavicongenerator.net)
+
+Kerakli PNG o'lchamlari: `72, 96, 128, 144, 152, 192, 384, 512` + maskable versiyalari
 
 ---
 
-## 🔗 Links
+## 🤖 Android App (Capacitor)
 
-- **Live Demo**: [https://aurora-ledger.vercel.app](https://aurora-ledger.vercel.app)
-- **Backend API**: [https://aurora-ledger-backend.onrender.com](https://aurora-ledger-backend.onrender.com)
-- **Report Issues**: [GitHub Issues](../../issues)
+Loyiha Capacitor bilan Android appga o'ralgan.
+
+### Capacitor o'rnatilgan pluginlar
+- `@capacitor/app` — back button
+- `@capacitor/status-bar` — status bar rangi
+- `@capacitor/splash-screen` — splash screen
+- `@capacitor/keyboard` — keyboard resize
+
+### Android build workflow
+
+**1. Build qilish va sync:**
+```bash
+cd frontend
+npm run android:build
+# yoki qo'lda:
+npm run build
+npx cap sync android
+```
+
+**2. Android Studio'da ochish:**
+```bash
+npx cap open android
+# Android Studio avtomatik ochiladi
+```
+
+**3. Emulator yoki real qurilmada run:**
+- Android Studio'da ▶ (Run) tugmasini bosing
+- Real qurilma: USB debugging yoqib ulang
+
+**4. Debug APK (test uchun):**
+Android Studio → Build → Build Bundle(s)/APK(s) → Build APK(s)
+
+**5. Release AAB (Play Market uchun):**
+Android Studio → Build → Generate Signed Bundle/APK → Android App Bundle
+
+> ⚠️ Release uchun **keystore** kerak. Keystore bir marta yaratilib xavfsiz saqlansin!
+
+```bash
+# Keystore yaratish (bir marta):
+keytool -genkey -v -keystore boyaka-release.keystore \
+  -alias boyaka -keyalg RSA -keysize 2048 -validity 10000
+```
+
+### App settings
+- **App ID:** `uz.boyaka.app`
+- **App Name:** Boyaka
+- **Min SDK:** 22 (Android 5.1+)
+- **Target SDK:** 34 (Android 14)
 
 ---
 
-## 🙏 Credits
+## 🔒 Environment Variables
 
-Built with amazing open-source technologies:
+### Frontend (`frontend/.env`)
 
-- [React](https://reactjs.org/) • [Vite](https://vitejs.dev/) • [Tailwind CSS](https://tailwindcss.com/)
-- [Node.js](https://nodejs.org/) • [Express](https://expressjs.com/) • [PostgreSQL](https://www.postgresql.org/)
-- [Vercel](https://vercel.com/) • [Render](https://render.com/) • [Neon](https://neon.tech/)
-- [ExchangeRate API](https://www.exchangerate-api.com/)
+```env
+VITE_API_URL=http://localhost:5000
+VITE_APP_ENV=development
+```
+
+### Backend (`backend/.env`)
+
+```env
+PORT=5000
+NODE_ENV=development
+DATABASE_URL=postgresql://user:pass@localhost:5432/boyaka
+JWT_SECRET=your_min_32_chars_secret
+FRONTEND_URL=http://localhost:5173
+```
+
+To'liq ro'yxat: `backend/.env.example` va `frontend/.env.example`
 
 ---
 
-<div align="center">
+## 📋 Play Market tayyorgarlik ro'yxati
 
-**Made with ❤️ by Aurora Ledger Team**
+- [ ] Google Play Console account yaratish
+- [ ] Release keystore yaratish va xavfsiz saqlash
+- [ ] App ikonlari (512×512 PNG + feature graphic 1024×500)
+- [ ] Screenshots (har xil screen o'lchamlarda)
+- [ ] Privacy Policy sahifasi (https://boyaka.app/privacy)
+- [ ] Terms of Use sahifasi (https://boyaka.app/terms)
+- [ ] App nomi, tavsif (Uzbek va Ingliz)
+- [ ] Release AAB yaratish (Android Studio)
+- [ ] App signing (Google-managed yoki self-managed)
+- [ ] Store listing to'ldirish
+- [ ] Ichki test → Closed test → Open test → Production
 
-⭐ Star this repo if you find it useful!
+---
 
-</div>
+## 🧪 Testing Checklist
+
+### Local
+- [x] `npm install` ✅
+- [x] `npm run dev` ✅
+- [x] `npm run build` ✅ (Exit code: 0)
+- [x] `npm run preview` ✅
+
+### PWA
+- [x] `dist/manifest.webmanifest` yaratildi ✅
+- [x] `dist/sw.js` service worker yaratildi ✅
+- [x] Offline sahifa: `public/offline.html` ✅
+- [x] Icons tuzilmasi: `public/icons/` ✅
+
+### Android
+- [x] `npx cap add android` ✅
+- [x] `npx cap sync android` ✅
+- [ ] Android Studio'da run → qurilmada test qiling
+
+### Deployment
+- [x] `vercel.json` — SPA routing + security headers ✅
+- [x] `netlify.toml` — Netlify config ✅
+- [x] `.env.example` fayllar ✅
+
+---
+
+## 📁 Loyiha tuzilmasi
+
+```
+boyaka/
+├── frontend/
+│   ├── public/
+│   │   ├── icons/           ← PWA ikonlar (almashtiring!)
+│   │   ├── offline.html     ← Offline fallback
+│   │   └── favicon.svg
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── Layout.jsx   ← Desktop sidebar + mobile bottom nav
+│   │   │   └── ErrorBoundary.jsx
+│   │   ├── pages/           ← Barcha sahifalar
+│   │   ├── context/         ← Auth, Currency, Theme
+│   │   ├── hooks/           ← Custom hooks
+│   │   └── utils/
+│   ├── android/             ← Capacitor Android project
+│   ├── capacitor.config.ts  ← Capacitor config
+│   ├── vite.config.js       ← Vite + PWA config
+│   └── package.json
+├── backend/
+│   ├── routes/
+│   ├── middleware/
+│   ├── config/
+│   └── server.js
+├── vercel.json              ← Vercel deployment config
+├── netlify.toml             ← Netlify deployment config
+└── README.md
+```
+
+---
+
+## 🤝 Muammo topilsa
+
+1. `npm run build` chiqargan errorni tekshiring
+2. `.env` fayllar to'g'ri sozlanganini tekshiring
+3. PostgreSQL ishlab turganini tekshiring (`pg_isready`)
+4. Backend loglarini tekshiring (`npm run dev` backend)
+
+---
+
+*Boyaka — O'z moliyangizni o'zingiz boshqaring 💙*
