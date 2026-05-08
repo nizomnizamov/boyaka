@@ -6,7 +6,8 @@ import { convertCurrency, POPULAR_CURRENCIES } from '../utils/currency.js';
 const router = express.Router();
 
 // Helper: Check if user has permission in family
-async function checkFamilyPermission(familyId, userId, requiredRoles = ['owner', 'admin', 'member']) {
+// Roles in DB: head, manager, contributor, observer
+async function checkFamilyPermission(familyId, userId, requiredRoles = ['head', 'manager', 'contributor', 'observer']) {
   const { rows } = await pool.query(
     'SELECT role, status FROM family_members WHERE family_id = $1 AND user_id = $2',
     [familyId, userId]
@@ -91,9 +92,9 @@ router.post('/:familyId/budgets', authMiddleware, async (req, res) => {
     const userId = req.user.id;
     const { name, amount, currency = 'USD', category_id, period = 'monthly', start_date, end_date } = req.body;
 
-    const { hasPermission } = await checkFamilyPermission(familyId, userId, ['owner', 'admin']);
+    const { hasPermission } = await checkFamilyPermission(familyId, userId, ['head', 'manager']);
     if (!hasPermission) {
-      return res.status(403).json({ error: 'Only owners and admins can create budgets' });
+      return res.status(403).json({ error: 'Only head and managers can create budgets' });
     }
 
     if (!name || !amount || !start_date) {
@@ -131,9 +132,9 @@ router.put('/:familyId/budgets/:budgetId', authMiddleware, async (req, res) => {
     const userId = req.user.id;
     const { name, amount, currency, category_id, period, start_date, end_date } = req.body;
 
-    const { hasPermission } = await checkFamilyPermission(familyId, userId, ['owner', 'admin']);
+    const { hasPermission } = await checkFamilyPermission(familyId, userId, ['head', 'manager']);
     if (!hasPermission) {
-      return res.status(403).json({ error: 'Only owners and admins can update budgets' });
+      return res.status(403).json({ error: 'Only head and managers can update budgets' });
     }
 
     const { rows } = await pool.query(
@@ -170,9 +171,9 @@ router.delete('/:familyId/budgets/:budgetId', authMiddleware, async (req, res) =
     const { familyId, budgetId } = req.params;
     const userId = req.user.id;
 
-    const { hasPermission } = await checkFamilyPermission(familyId, userId, ['owner', 'admin']);
+    const { hasPermission } = await checkFamilyPermission(familyId, userId, ['head', 'manager']);
     if (!hasPermission) {
-      return res.status(403).json({ error: 'Only owners and admins can delete budgets' });
+      return res.status(403).json({ error: 'Only head and managers can delete budgets' });
     }
 
     const { rowCount } = await pool.query(
@@ -271,9 +272,9 @@ router.post('/:familyId/goals', authMiddleware, async (req, res) => {
     const userId = req.user.id;
     const { name, description, target_amount, currency = 'USD', target_date } = req.body;
 
-    const { hasPermission } = await checkFamilyPermission(familyId, userId, ['owner', 'admin', 'member']);
+    const { hasPermission } = await checkFamilyPermission(familyId, userId, ['head', 'manager', 'contributor']);
     if (!hasPermission) {
-      return res.status(403).json({ error: 'Access denied' });
+      return res.status(403).json({ error: 'Only head, managers and contributors can create goals' });
     }
 
     if (!name || !target_amount) {
@@ -390,9 +391,9 @@ router.put('/:familyId/goals/:goalId', authMiddleware, async (req, res) => {
     const userId = req.user.id;
     const { name, description, target_amount, currency, target_date, status } = req.body;
 
-    const { hasPermission } = await checkFamilyPermission(familyId, userId, ['owner', 'admin']);
+    const { hasPermission } = await checkFamilyPermission(familyId, userId, ['head', 'manager']);
     if (!hasPermission) {
-      return res.status(403).json({ error: 'Only owners and admins can update goals' });
+      return res.status(403).json({ error: 'Only head and managers can update goals' });
     }
 
     const { rows } = await pool.query(
@@ -428,9 +429,9 @@ router.delete('/:familyId/goals/:goalId', authMiddleware, async (req, res) => {
     const { familyId, goalId } = req.params;
     const userId = req.user.id;
 
-    const { hasPermission } = await checkFamilyPermission(familyId, userId, ['owner', 'admin']);
+    const { hasPermission } = await checkFamilyPermission(familyId, userId, ['head', 'manager']);
     if (!hasPermission) {
-      return res.status(403).json({ error: 'Only owners and admins can delete goals' });
+      return res.status(403).json({ error: 'Only head and managers can delete goals' });
     }
 
     const { rowCount } = await pool.query(

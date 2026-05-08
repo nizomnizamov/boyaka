@@ -379,8 +379,8 @@ const Dashboard = () => {
                     paddingAngle={2}
                     startAngle={90} endAngle={-270}
                   >
-                    {chartData.map((entry, i) => (
-                      <Cell key={i} fill={entry.fill} strokeWidth={0} />
+                    {chartData.map((entry) => (
+                      <Cell key={entry.name} fill={entry.fill} strokeWidth={0} />
                     ))}
                   </Pie>
                   <Tooltip content={<DonutTooltip formatCurrency={formatCurrency} />} />
@@ -390,10 +390,10 @@ const Dashboard = () => {
 
             {/* Legend */}
             <div className="flex-1 w-full space-y-2">
-              {chartData.map((c, i) => {
+              {chartData.map((c) => {
                 const pct = stats.expense > 0 ? Math.round((c.total / stats.expense) * 100) : 0;
                 return (
-                  <div key={i} className="flex items-center gap-2.5">
+                  <div key={c.name} className="flex items-center gap-2.5">
                     <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: c.fill }} />
                     <p className="text-[13px] font-medium text-text-primary dark:text-dark-text-primary flex-1 truncate">
                       {c.name}

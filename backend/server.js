@@ -147,13 +147,47 @@ if (process.env.PROCESS_RECURRING_ON_STARTUP === 'true') {
   });
 }
 
-// Start server
-app.listen(PORT, () => {
+// Start server with port conflict handling
+const server = app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🌐 CORS enabled for: ${process.env.FRONTEND_URL || '*'}`);
   console.log(`⏰ Recurring transactions cron job scheduled (daily at 00:05)`);
 });
 
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    const nextPort = parseInt(PORT) + 1;
+    console.error(`❌ Port ${PORT} is already in use!`);
+    console.log(`🔄 Trying port ${nextPort}...`);
+    server.close();
+    app.listen(nextPort, () => {
+      console.log(`🚀 Server running on fallback port ${nextPort}`);
+      console.log(`💡 Tip: Kill old process with: Get-Process -Name node | Stop-Process -Force`);
+    });
+  } else {
+    console.error('❌ Server error:', err);
+    process.exit(1);
+  }
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('🛑 SIGTERM received. Shutting down gracefully...');
+  server.close(() => {
+    console.log('✅ Server closed');
+    process.exit(0);
+  });
+});
+
+process.on('SIGINT', () => {
+  console.log('🛑 SIGINT received. Shutting down gracefully...');
+  server.close(() => {
+    console.log('✅ Server closed');
+    process.exit(0);
+  });
+});
+
 export default app;
+
 

@@ -7,9 +7,12 @@ import toast from 'react-hot-toast';
 import {
   Users, Plus, Mail, Shield, Trash2, Settings,
   UserPlus, X, Check, Crown, UserCheck, Eye, AlertTriangle,
-  Copy, Link as LinkIcon, Ticket, DollarSign, Target
+  Copy, Link as LinkIcon, Ticket, DollarSign, Target, Edit2, TrendingUp
 } from 'lucide-react';
 import { clearAuthAndReload } from '../utils/debugAuth';
+import SharedBudgetModal from '../components/SharedBudgetModal';
+import SharedGoalModal from '../components/SharedGoalModal';
+import ContributeToGoalModal from '../components/ContributeToGoalModal';
 
 export default function Family() {
   const { t } = useTranslation();
@@ -29,6 +32,14 @@ export default function Family() {
   const [activeTab, setActiveTab] = useState('members'); // members, budgets, goals
   const [sharedBudgets, setSharedBudgets] = useState([]);
   const [sharedGoals, setSharedGoals] = useState([]);
+  // Budget modals
+  const [showBudgetModal, setShowBudgetModal] = useState(false);
+  const [editingBudget, setEditingBudget] = useState(null);
+  // Goal modals
+  const [showGoalModal, setShowGoalModal] = useState(false);
+  const [editingGoal, setEditingGoal] = useState(null);
+  const [showContributeModal, setShowContributeModal] = useState(false);
+  const [selectedGoal, setSelectedGoal] = useState(null);
 
   useEffect(() => {
     fetchData();
@@ -830,15 +841,15 @@ export default function Family() {
                       <div>
                         <div className="flex items-center justify-between mb-4">
                           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                            Ngân sách chung ({sharedBudgets.length})
+                            Umumiy byudjetlar ({sharedBudgets.length})
                           </h3>
-                          {['head', 'manager', 'contributor'].includes(familyDetails.currentUserRole) && (
+                          {['head', 'manager'].includes(familyDetails.currentUserRole) && (
                             <button
-                              onClick={() => toast.info('Chức năng đang phát triển')}
+                              onClick={() => { setEditingBudget(null); setShowBudgetModal(true); }}
                               className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                             >
                               <Plus className="h-4 w-4" />
-                              Tạo ngân sách
+                              Byudjet qo'shish
                             </button>
                           )}
                         </div>
@@ -854,32 +865,67 @@ export default function Family() {
                           </div>
                         ) : (
                           <div className="space-y-3">
-                            {sharedBudgets.map((budget) => (
-                              <div key={budget.id} className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                                <div className="flex items-start justify-between">
-                                  <div className="flex-1">
-                                    <h4 className="font-semibold text-gray-900 dark:text-white">{budget.name}</h4>
-                                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                                      {budget.category_name || 'Không danh mục'}
-                                    </p>
-                                    <div className="mt-3">
-                                      <div className="flex items-center justify-between text-sm mb-1">
-                                        <span className="text-gray-600 dark:text-gray-400">Đã dùng</span>
-                                        <span className="font-semibold">
-                                          {formatCurrency(budget.spent || 0)} / {formatCurrency(budget.amount)}
-                                        </span>
+                            {sharedBudgets.map((budget) => {
+                              const pct = budget.amount > 0 ? Math.min((budget.spent / budget.amount) * 100, 100) : 0;
+                              const isOver = pct >= 100;
+                              return (
+                                <div key={budget.id} className="p-4 bg-gray-50 dark:bg-gray-700 rounded-xl border border-gray-200 dark:border-gray-600">
+                                  <div className="flex items-start justify-between">
+                                    <div className="flex-1">
+                                      <div className="flex items-center gap-2">
+                                        <h4 className="font-semibold text-gray-900 dark:text-white">{budget.name}</h4>
+                                        {isOver && <span className="text-xs px-2 py-0.5 bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 rounded-full">Limitdan oshdi!</span>}
                                       </div>
-                                      <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
-                                        <div
-                                          className="bg-blue-600 h-2 rounded-full"
-                                          style={{ width: `${Math.min((budget.spent / budget.amount) * 100, 100)}%` }}
-                                        ></div>
+                                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                                        {budget.category_name || 'Kategoriyasiz'} · {budget.period}
+                                      </p>
+                                      <div className="mt-3">
+                                        <div className="flex items-center justify-between text-sm mb-1">
+                                          <span className="text-gray-600 dark:text-gray-400">Sarflangan</span>
+                                          <span className="font-semibold">
+                                            {formatCurrency(budget.spent || 0)} / {formatCurrency(budget.amount)}
+                                          </span>
+                                        </div>
+                                        <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
+                                          <div
+                                            className={`h-2 rounded-full transition-all ${isOver ? 'bg-red-500' : pct >= 80 ? 'bg-yellow-500' : 'bg-blue-500'}`}
+                                            style={{ width: `${pct}%` }}
+                                          />
+                                        </div>
+                                        <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                                          Qoldi: {formatCurrency(Math.max(budget.amount - budget.spent, 0))} · {budget.created_by_name} tomonidan
+                                        </p>
                                       </div>
                                     </div>
+                                    {['head', 'manager'].includes(familyDetails.currentUserRole) && (
+                                      <div className="flex gap-1 ml-3">
+                                        <button
+                                          onClick={() => { setEditingBudget(budget); setShowBudgetModal(true); }}
+                                          className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                                          title="Tahrirlash"
+                                        >
+                                          <Edit2 className="h-4 w-4" />
+                                        </button>
+                                        <button
+                                          onClick={async () => {
+                                            if (!confirm('Bu byudjetni o\'chirishni tasdiqlaysizmi?')) return;
+                                            try {
+                                              await api.delete(`/family/${selectedFamily}/budgets/${budget.id}`);
+                                              toast.success('Byudjet o\'chirildi');
+                                              fetchSharedData(selectedFamily);
+                                            } catch { toast.error('Xatolik yuz berdi'); }
+                                          }}
+                                          className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                                          title="O'chirish"
+                                        >
+                                          <Trash2 className="h-4 w-4" />
+                                        </button>
+                                      </div>
+                                    )}
                                   </div>
                                 </div>
-                              </div>
-                            ))}
+                              );
+                            })}
                           </div>
                         )}
                       </div>
@@ -890,15 +936,15 @@ export default function Family() {
                       <div>
                         <div className="flex items-center justify-between mb-4">
                           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                            Mục tiêu chung ({sharedGoals.length})
+                            Umumiy maqsadlar ({sharedGoals.length})
                           </h3>
                           {['head', 'manager', 'contributor'].includes(familyDetails.currentUserRole) && (
                             <button
-                              onClick={() => toast.info('Chức năng đang phát triển')}
-                              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                              onClick={() => { setEditingGoal(null); setShowGoalModal(true); }}
+                              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
                             >
                               <Plus className="h-4 w-4" />
-                              Tạo mục tiêu
+                              Maqsad qo'shish
                             </button>
                           )}
                         </div>
@@ -914,46 +960,93 @@ export default function Family() {
                           </div>
                         ) : (
                           <div className="space-y-3">
-                            {sharedGoals.map((goal) => (
-                              <div key={goal.id} className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                                <div className="flex items-start justify-between">
-                                  <div className="flex-1">
-                                    <div className="flex items-center gap-2">
-                                      <span className="text-2xl">{goal.icon || '🎯'}</span>
-                                      <h4 className="font-semibold text-gray-900 dark:text-white">{goal.name}</h4>
-                                    </div>
-                                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                                      {goal.category || 'Không danh mục'}
-                                    </p>
-                                    <div className="mt-3">
-                                      <div className="flex items-center justify-between text-sm mb-1">
-                                        <span className="text-gray-600 dark:text-gray-400">Tiến độ</span>
-                                        <span className="font-semibold">
-                                          {formatCurrency(goal.current_amount || 0)} / {formatCurrency(goal.target_amount)}
-                                        </span>
+                            {sharedGoals.map((goal) => {
+                              const pct = goal.target_amount > 0 ? Math.min((goal.current_amount / goal.target_amount) * 100, 100) : 0;
+                              const isCompleted = goal.status === 'completed';
+                              return (
+                                <div key={goal.id} className="p-4 bg-gray-50 dark:bg-gray-700 rounded-xl border border-gray-200 dark:border-gray-600">
+                                  <div className="flex items-start justify-between">
+                                    <div className="flex-1">
+                                      <div className="flex items-center gap-2">
+                                        <span className="text-xl">🎯</span>
+                                        <h4 className="font-semibold text-gray-900 dark:text-white">{goal.name}</h4>
+                                        {isCompleted && <span className="text-xs px-2 py-0.5 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 rounded-full">✅ Bajarildi!</span>}
                                       </div>
-                                      <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
-                                        <div
-                                          className="bg-green-600 h-2 rounded-full"
-                                          style={{ width: `${Math.min((goal.current_amount / goal.target_amount) * 100, 100)}%` }}
-                                        ></div>
+                                      {goal.description && (
+                                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{goal.description}</p>
+                                      )}
+                                      <div className="mt-3">
+                                        <div className="flex items-center justify-between text-sm mb-1">
+                                          <span className="text-gray-600 dark:text-gray-400">Jarayon</span>
+                                          <span className="font-semibold">
+                                            {formatCurrency(goal.current_amount || 0)} / {formatCurrency(goal.target_amount)} · {pct.toFixed(1)}%
+                                          </span>
+                                        </div>
+                                        <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2.5">
+                                          <div
+                                            className={`h-2.5 rounded-full transition-all ${isCompleted ? 'bg-green-500' : 'bg-emerald-500'}`}
+                                            style={{ width: `${pct}%` }}
+                                          />
+                                        </div>
+                                        <div className="flex justify-between text-xs text-gray-400 dark:text-gray-500 mt-1">
+                                          <span>{goal.created_by_name} tomonidan</span>
+                                          {goal.target_date && <span>Muddat: {new Date(goal.target_date).toLocaleDateString()}</span>}
+                                        </div>
                                       </div>
+                                      {/* Contributions summary */}
+                                      {goal.contributions && goal.contributions.length > 0 && (
+                                        <div className="mt-2 flex flex-wrap gap-1">
+                                          {goal.contributions.slice(0, 3).map(c => (
+                                            <span key={c.id} className="text-xs bg-white dark:bg-gray-600 border border-gray-200 dark:border-gray-500 px-2 py-0.5 rounded-full text-gray-600 dark:text-gray-300">
+                                              {c.contributor_name}: {formatCurrency(c.amount)}
+                                            </span>
+                                          ))}
+                                          {goal.contributions.length > 3 && (
+                                            <span className="text-xs text-gray-400">+{goal.contributions.length - 3} boshqa</span>
+                                          )}
+                                        </div>
+                                      )}
                                     </div>
-                                    {goal.deadline && (
-                                      <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
-                                        Deadline: {new Date(goal.deadline).toLocaleDateString()}
-                                      </p>
-                                    )}
+                                    <div className="flex flex-col gap-1 ml-3">
+                                      {!isCompleted && (
+                                        <button
+                                          onClick={() => { setSelectedGoal(goal); setShowContributeModal(true); }}
+                                          className="flex items-center gap-1 px-3 py-1.5 text-sm bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
+                                        >
+                                          <TrendingUp className="h-3.5 w-3.5" />
+                                          Hissa
+                                        </button>
+                                      )}
+                                      {['head', 'manager'].includes(familyDetails.currentUserRole) && (
+                                        <>
+                                          <button
+                                            onClick={() => { setEditingGoal(goal); setShowGoalModal(true); }}
+                                            className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                                            title="Tahrirlash"
+                                          >
+                                            <Edit2 className="h-4 w-4" />
+                                          </button>
+                                          <button
+                                            onClick={async () => {
+                                              if (!confirm('Bu maqsadni o\'chirishni tasdiqlaysizmi?')) return;
+                                              try {
+                                                await api.delete(`/family/${selectedFamily}/goals/${goal.id}`);
+                                                toast.success('Maqsad o\'chirildi');
+                                                fetchSharedData(selectedFamily);
+                                              } catch { toast.error('Xatolik yuz berdi'); }
+                                            }}
+                                            className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                                            title="O'chirish"
+                                          >
+                                            <Trash2 className="h-4 w-4" />
+                                          </button>
+                                        </>
+                                      )}
+                                    </div>
                                   </div>
-                                  <button
-                                    onClick={() => toast.info('Chức năng đóng góp đang phát triển')}
-                                    className="ml-4 px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700"
-                                  >
-                                    Đóng góp
-                                  </button>
                                 </div>
-                              </div>
-                            ))}
+                              );
+                            })}
                           </div>
                         )}
                       </div>
@@ -964,6 +1057,33 @@ export default function Family() {
             )}
           </div>
         )}
+
+      {/* Shared Budget Modal */}
+      <SharedBudgetModal
+        familyId={selectedFamily}
+        budget={editingBudget}
+        show={showBudgetModal}
+        onClose={() => { setShowBudgetModal(false); setEditingBudget(null); }}
+        onSuccess={() => fetchSharedData(selectedFamily)}
+      />
+
+      {/* Shared Goal Modal */}
+      <SharedGoalModal
+        familyId={selectedFamily}
+        goal={editingGoal}
+        show={showGoalModal}
+        onClose={() => { setShowGoalModal(false); setEditingGoal(null); }}
+        onSuccess={() => fetchSharedData(selectedFamily)}
+      />
+
+      {/* Contribute to Goal Modal */}
+      <ContributeToGoalModal
+        familyId={selectedFamily}
+        goal={selectedGoal}
+        show={showContributeModal}
+        onClose={() => { setShowContributeModal(false); setSelectedGoal(null); }}
+        onSuccess={() => fetchSharedData(selectedFamily)}
+      />
 
       {/* Create Family Modal */}
       {showCreateModal && (
