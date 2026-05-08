@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Boyaka – Dashboard Demo</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #f3f4f6; --surface: #ffffff; --border: #e5e7eb;
+    --text: #111827; --sub: #6b7280; --accent: #2563eb;
+    --green: #16a34a; --red: #dc2626; --blue: #2563eb;
+    --sidebar: #1e293b; --sidebar-text: #cbd5e1; --sidebar-active: #3b82f6;
+  }
+  .dark {
+    --bg: #0f172a; --surface: #1e293b; --border: #334155;
+    --text: #f1f5f9; --sub: #94a3b8; --accent: #60a5fa;
+    --green: #4ade80; --red: #f87171; --blue: #60a5fa;
+    --sidebar: #0f172a; --sidebar-text: #94a3b8; --sidebar-active: #3b82f6;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
+  body { background: var(--bg); color: var(--text); display: flex; min-height: 100vh; transition: background .3s, color .3s; }
+
+  /* Sidebar */
+  .sidebar {
+    width: 240px; background: var(--sidebar); color: var(--sidebar-text);
+    display: flex; flex-direction: column; padding: 0; flex-shrink: 0;
+    min-height: 100vh; position: sticky; top: 0;
+  }
+  .sidebar-logo {
+    padding: 20px 16px 16px; border-bottom: 1px solid rgba(255,255,255,.08);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .sidebar-logo .logo-icon {
+    width: 36px; height: 36px; background: linear-gradient(135deg,#3b82f6,#8b5cf6);
+    border-radius: 10px; display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+  .sidebar-logo .logo-text { font-weight: 700; font-size: 15px; color: #f1f5f9; }
+  .sidebar-logo .logo-sub { font-size: 10px; color: #94a3b8; }
+  .sidebar-nav { padding: 12px 8px; flex: 1; }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+    border-radius: 8px; cursor: pointer; margin-bottom: 2px;
+    font-size: 13.5px; color: var(--sidebar-text); transition: all .2s;
+  }
+  .nav-item:hover { background: rgba(255,255,255,.07); color: #f1f5f9; }
+  .nav-item.active { background: var(--sidebar-active); color: #fff; }
+  .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+  .sidebar-bottom { padding: 12px 8px; border-top: 1px solid rgba(255,255,255,.08); }
+  .sidebar-selectors { padding: 8px 8px 0; display: flex; flex-direction: column; gap: 8px; }
+
+  /* Custom select */
+  .custom-select {
+    width: 100%; display: flex; align-items: center; gap: 8px; padding: 8px 10px;
+    background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
+    border-radius: 8px; cursor: pointer; color: var(--sidebar-text);
+    font-size: 13px; position: relative; user-select: none;
+  }
+  .custom-select:hover { background: rgba(255,255,255,.1); }
+  .custom-select .arrow { margin-left: auto; transition: transform .2s; }
+  .custom-select.open .arrow { transform: rotate(180deg); }
+  .dropdown {
+    position: absolute; left: 8px; right: 8px; background: #1e293b;
+    border: 1px solid rgba(255,255,255,.12); border-radius: 8px;
+    z-index: 100; box-shadow: 0 8px 24px rgba(0,0,0,.4);
+    max-height: 220px; overflow-y: auto; display: none;
+  }
+  .dropdown.show { display: block; }
+  .dropdown-item {
+    padding: 9px 12px; cursor: pointer; font-size: 13px; color: #cbd5e1;
+    display: flex; align-items: center; gap: 8px; transition: background .15s;
+  }
+  .dropdown-item:hover { background: rgba(255,255,255,.08); }
+  .dropdown-item.selected { background: rgba(59,130,246,.2); color: #60a5fa; }
+
+  /* Main content */
+  .main { flex: 1; padding: 28px 32px; overflow-y: auto; }
+
+  /* Header */
+  .page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+  .page-title { font-size: 26px; font-weight: 700; color: var(--text); }
+  .page-sub { font-size: 14px; color: var(--sub); margin-top: 3px; }
+  .view-tabs { display: flex; gap: 6px; }
+  .tab-btn {
+    padding: 8px 14px; border-radius: 8px; border: none; cursor: pointer;
+    font-size: 13px; font-weight: 500; transition: all .2s;
+    background: var(--surface); color: var(--sub); border: 1px solid var(--border);
+  }
+  .tab-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+  /* Cards */
+  .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+  .stat-card {
+    background: var(--surface); border-radius: 14px; padding: 20px;
+    border: 1px solid var(--border); display: flex; align-items: center;
+    justify-content: space-between; border-left: 4px solid;
+    transition: transform .2s, box-shadow .2s;
+  }
+  .stat-card:hover { transform: translateY(-2px); box-shadow: 0 4px 20px rgba(0,0,0,.08); }
+  .stat-label { font-size: 13px; color: var(--sub); margin-bottom: 6px; }
+  .stat-value { font-size: 22px; font-weight: 700; }
+  .stat-icon { font-size: 28px; opacity: .85; }
+  .card-blue { border-left-color: #3b82f6; }
+  .card-green { border-left-color: #22c55e; }
+  .card-red { border-left-color: #ef4444; }
+  .text-green { color: var(--green); }
+  .text-red { color: var(--red); }
+  .text-blue { color: var(--blue); }
+
+  /* Grid */
+  .content-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .card {
+    background: var(--surface); border-radius: 14px; padding: 22px;
+    border: 1px solid var(--border);
+  }
+  .card-title { font-size: 16px; font-weight: 700; margin-bottom: 16px; color: var(--text); }
+  .card-title-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .view-all { font-size: 13px; color: var(--accent); cursor: pointer; text-decoration: none; }
+
+  /* Chart */
+  .chart-wrap { position: relative; height: 220px; }
+
+  /* Legend */
+  .legend-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; max-height: 110px; overflow-y: auto; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--sub); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .legend-amount { margin-left: auto; font-weight: 600; color: var(--text); }
+
+  /* Transactions */
+  .tx-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 11px 13px; background: var(--bg); border-radius: 10px; margin-bottom: 8px;
+    transition: background .2s;
+  }
+  .tx-item:hover { background: var(--border); }
+  .tx-left { display: flex; align-items: center; gap: 12px; }
+  .tx-icon {
+    width: 38px; height: 38px; border-radius: 50%; display: flex;
+    align-items: center; justify-content: center; font-size: 16px;
+  }
+  .tx-name { font-size: 14px; font-weight: 600; color: var(--text); }
+  .tx-date { font-size: 12px; color: var(--sub); margin-top: 2px; }
+  .tx-amount { font-size: 14px; font-weight: 700; }
+
+  /* Progress bars */
+  .progress-item { margin-bottom: 14px; }
+  .progress-row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 13px; }
+  .progress-track { background: var(--border); border-radius: 99px; height: 7px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 99px; transition: width .8s ease; }
+
+  /* Theme toggle */
+  .theme-btn {
+    background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12);
+    border-radius: 8px; color: var(--sidebar-text); cursor: pointer;
+    padding: 8px 12px; font-size: 13px; width: 100%; text-align: left;
+    display: flex; align-items: center; gap: 8px; transition: background .2s;
+  }
+  .theme-btn:hover { background: rgba(255,255,255,.13); }
+
+  /* Forecast */
+  .forecast-item {
+    padding: 12px; background: var(--bg); border-radius: 10px; margin-bottom: 8px;
+  }
+  .forecast-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .forecast-vals { display: flex; gap: 20px; font-size: 12px; }
+  .forecast-val { text-align: center; }
+  .forecast-val .label { color: var(--sub); margin-bottom: 2px; }
+  .forecast-val .value { font-weight: 700; font-size: 13px; }
+
+  /* Tip box */
+  .tip-box { background: rgba(59,130,246,.1); border-radius: 10px; padding: 12px 14px; margin-top: 12px; font-size: 12.5px; color: var(--blue); }
+
+  /* Dropdown position helpers */
+  .select-wrap { position: relative; }
+  .dropdown-lang { bottom: 100%; margin-bottom: 6px; }
+  .dropdown-curr { bottom: 100%; margin-bottom: 6px; }
+
+  @media (max-width: 900px) {
+    .stats-grid { grid-template-columns: 1fr; }
+    .content-grid { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .main { padding: 18px 14px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">💎</div>
+    <div>
+      <div class="logo-text">Boyaka</div>
+      <div class="logo-sub" id="tagline">Moliyangizni boshqaring</div>
+    </div>
+  </div>
+
+  <div class="sidebar-selectors">
+    <!-- Language -->
+    <div class="select-wrap">
+      <div class="custom-select" id="langBtn" onclick="toggleDropdown('langDrop','langBtn')">
+        <span id="langFlag">🇺🇿</span>
+        <span id="langName">O'zbek</span>
+        <span class="arrow">▾</span>
+      </div>
+      <div class="dropdown dropdown-lang" id="langDrop">
+        <div class="dropdown-item selected" onclick="setLang('uz','🇺🇿','O\'zbek')">🇺🇿 O'zbek</div>
+        <div class="dropdown-item" onclick="setLang('ru','🇷🇺','Русский')">🇷🇺 Русский</div>
+        <div class="dropdown-item" onclick="setLang('en','🇺🇸','English')">🇺🇸 English</div>
+      </div>
+    </div>
+    <!-- Currency -->
+    <div class="select-wrap">
+      <div class="custom-select" id="currBtn" onclick="toggleDropdown('currDrop','currBtn')">
+        <span id="currFlag">🇺🇿</span>
+        <span id="currCode">UZS</span>
+        <span class="arrow">▾</span>
+      </div>
+      <div class="dropdown dropdown-curr" id="currDrop">
+        <div class="dropdown-item selected" onclick="setCurr('UZS','🇺🇿')">🇺🇿 UZS — so'm</div>
+        <div class="dropdown-item" onclick="setCurr('USD','🇺🇸')">🇺🇸 USD — Dollar</div>
+        <div class="dropdown-item" onclick="setCurr('RUB','🇷🇺')">🇷🇺 RUB — Rubl</div>
+        <div class="dropdown-item" onclick="setCurr('JPY','🇯🇵')">🇯🇵 JPY — Yen</div>
+        <div class="dropdown-item" onclick="setCurr('CNY','🇨🇳')">🇨🇳 CNY — Yuan</div>
+        <div class="dropdown-item" onclick="setCurr('EUR','🇪🇺')">🇪🇺 EUR — Euro</div>
+        <div class="dropdown-item" onclick="setCurr('AED','🇦🇪')">🇦🇪 AED — Dirham</div>
+      </div>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-item active"><span class="nav-icon">🏠</span> <span data-key="nav.dashboard">Bosh sahifa</span></div>
+    <div class="nav-item"><span class="nav-icon">💸</span> <span data-key="nav.transactions">Tranzaksiyalar</span></div>
+    <div class="nav-item"><span class="nav-icon">🔄</span> <span data-key="nav.recurring">Takroriy</span></div>
+    <div class="nav-item"><span class="nav-icon">🎯</span> <span data-key="nav.goals">Maqsadlar</span></div>
+    <div class="nav-item"><span class="nav-icon">🏷️</span> <span data-key="nav.categories">Kategoriyalar</span></div>
+    <div class="nav-item"><span class="nav-icon">📊</span> <span data-key="nav.budgets">Byudjet</span></div>
+    <div class="nav-item"><span class="nav-icon">📈</span> <span data-key="nav.reports">Hisobotlar</span></div>
+    <div class="nav-item"><span class="nav-icon">👨‍👩‍👧</span> <span data-key="nav.family">Oila</span></div>
+  </nav>
+
+  <div class="sidebar-bottom">
+    <button class="theme-btn" onclick="toggleTheme()">
+      <span id="themeIcon">🌙</span>
+      <span id="themeLabel">Tungi rejim</span>
+    </button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title" data-key="dashboard.title">Bosh sahifa</h1>
+      <p class="page-sub"><span data-key="dashboard.overviewFor">Ko'rinish:</span> <span id="periodLabel">May 2026</span></p>
+    </div>
+    <div class="view-tabs">
+      <button class="tab-btn active" onclick="setView('month',this)" data-key="dashboard.thisMonth">Bu oy</button>
+      <button class="tab-btn" onclick="setView('last30',this)" data-key="dashboard.last30Days">So'nggi 30 kun</button>
+      <button class="tab-btn" onclick="setView('all',this)" data-key="dashboard.allTime">Barcha vaqt</button>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-grid">
+    <div class="stat-card card-blue">
+      <div>
+        <div class="stat-label" data-key="dashboard.balance">Balans</div>
+        <div class="stat-value text-green" id="statBalance">+12,450,000 so'm</div>
+      </div>
+      <div class="stat-icon">👛</div>
+    </div>
+    <div class="stat-card card-green">
+      <div>
+        <div class="stat-label" data-key="dashboard.income">Daromad</div>
+        <div class="stat-value text-green" id="statIncome">32,000,000 so'm</div>
+      </div>
+      <div class="stat-icon">📈</div>
+    </div>
+    <div class="stat-card card-red">
+      <div>
+        <div class="stat-label" data-key="dashboard.expenses">Xarajatlar</div>
+        <div class="stat-value text-red" id="statExpense">19,550,000 so'm</div>
+      </div>
+      <div class="stat-icon">📉</div>
+    </div>
+  </div>
+
+  <!-- Content grid -->
+  <div class="content-grid">
+
+    <!-- Pie chart -->
+    <div class="card">
+      <div class="card-title" data-key="dashboard.expenseBreakdown">Xarajatlar taqsimoti</div>
+      <div class="chart-wrap">
+        <canvas id="pieChart"></canvas>
+      </div>
+      <div class="legend-grid" id="legendGrid"></div>
+    </div>
+
+    <!-- Forecast -->
+    <div class="card">
+      <div class="card-title-row">
+        <span class="card-title" style="margin-bottom:0">📈 <span data-key="forecast.title">Keyingi oy bashorati</span></span>
+        <span style="font-size:12px;color:var(--sub)" data-key="forecast.based">3 oyga asoslanib</span>
+      </div>
+      <div id="forecastList"></div>
+      <div class="tip-box" data-key="forecast.tip">💡 <strong>Maslahat:</strong> Bashoratlar sarflash naqshlaringizga asoslanadi.</div>
+    </div>
+
+    <!-- Recent transactions -->
+    <div class="card">
+      <div class="card-title-row">
+        <span class="card-title" style="margin-bottom:0" data-key="dashboard.recentTransactions">So'nggi tranzaksiyalar</span>
+        <a class="view-all" data-key="dashboard.viewAll">Barchasini ko'rish →</a>
+      </div>
+      <div id="txList"></div>
+    </div>
+
+    <!-- Top categories -->
+    <div class="card">
+      <div class="card-title" data-key="dashboard.topSpendingCategories">Eng ko'p xarajat kategoriyalari</div>
+      <div id="catList"></div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+// ─── DATA ────────────────────────────────────────────────────────────────────
+const RATES = { UZS:1, USD:0.0000775, RUB:0.0071, JPY:0.0117, CNY:0.000562, EUR:0.0000715, AED:0.000285 };
+const SYMBOLS = { UZS:"so'm", USD:'$', RUB:'₽', JPY:'¥', CNY:'¥', EUR:'€', AED:'د.إ' };
+const AFTER = ['UZS','JPY','RUB'];
+const NO_DEC = ['UZS','JPY'];
+
+const CATS = [
+  { name:'Oziq-ovqat', nameRu:'Еда', nameEn:'Food', color:'#f59e0b', icon:'🛒', val:5800000 },
+  { name:'Transport', nameRu:'Транспорт', nameEn:'Transport', color:'#3b82f6', icon:'🚗', val:3200000 },
+  { name:'Ko\'ngilochar', nameRu:'Развлечения', nameEn:'Entertainment', color:'#8b5cf6', icon:'🎮', val:2500000 },
+  { name:'Kommunal', nameRu:'Коммунальные', nameEn:'Utilities', color:'#ef4444', icon:'💡', val:4100000 },
+  { name:'Sog\'liq', nameRu:'Здоровье', nameEn:'Health', color:'#22c55e', icon:'💊', val:3950000 },
+];
+
+const TXNS = [
+  { cat:'Oziq-ovqat', catRu:'Еда', catEn:'Food', icon:'🛒', color:'#f59e0b', date:'2026-05-06', type:'expense', amt:850000 },
+  { cat:'Daromad', catRu:'Зарплата', catEn:'Salary', icon:'💰', color:'#22c55e', date:'2026-05-05', type:'income', amt:8000000 },
+  { cat:'Transport', catRu:'Транспорт', catEn:'Transport', icon:'🚗', color:'#3b82f6', date:'2026-05-04', type:'expense', amt:120000 },
+  { cat:'Ko\'ngilochar', catRu:'Развлечения', catEn:'Entertainment', icon:'🎮', color:'#8b5cf6', date:'2026-05-03', type:'expense', amt:350000 },
+  { cat:'Freelance', catRu:'Фриланс', catEn:'Freelance', icon:'💻', color:'#06b6d4', date:'2026-05-02', type:'income', amt:3200000 },
+];
+
+const FORECAST = [
+  { cat:'Oziq-ovqat', catRu:'Еда', catEn:'Food', color:'#f59e0b', forecast:6200000, last:5800000 },
+  { cat:'Kommunal', catRu:'Коммунальные', catEn:'Utilities', color:'#ef4444', forecast:3800000, last:4100000 },
+  { cat:'Transport', catRu:'Транспорт', catEn:'Transport', color:'#3b82f6', forecast:3500000, last:3200000 },
+];
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let lang = 'uz';
+let curr = 'UZS';
+let dark = false;
+let viewMode = 'month';
+
+const BASE_INCOME = 32000000;
+const BASE_EXPENSE = 19550000;
+
+// ─── i18n ────────────────────────────────────────────────────────────────────
+const T = {
+  uz: {
+    'nav.dashboard':'Bosh sahifa','nav.transactions':'Tranzaksiyalar','nav.recurring':'Takroriy',
+    'nav.goals':'Maqsadlar','nav.categories':'Kategoriyalar','nav.budgets':'Byudjet',
+    'nav.reports':'Hisobotlar','nav.family':'Oila',
+    'dashboard.title':'Bosh sahifa','dashboard.overviewFor':'Ko\'rinish:',
+    'dashboard.balance':'Balans','dashboard.income':'Daromad','dashboard.expenses':'Xarajatlar',
+    'dashboard.thisMonth':'Bu oy','dashboard.last30Days':'So\'nggi 30 kun','dashboard.allTime':'Barcha vaqt',
+    'dashboard.expenseBreakdown':'Xarajatlar taqsimoti','dashboard.recentTransactions':'So\'nggi tranzaksiyalar',
+    'dashboard.topSpendingCategories':'Eng ko\'p xarajat kategoriyalari','dashboard.viewAll':'Barchasini ko\'rish →',
+    'forecast.title':'Keyingi oy bashorati','forecast.based':'3 oyga asoslanib',
+    'forecast.tip':'💡 Bashoratlar sarflash naqshlaringizga asoslanadi.',
+    'forecast.predicted':'Bashorat','forecast.lastMonth':'O\'tgan oy','forecast.change':'O\'zgarish',
+    'tagline':'Moliyangizni boshqaring','theme.dark':'Tungi rejim','theme.light':'Kunduzgi rejim',
+    'period.month':'May 2026','period.last30':'So\'nggi 30 kun','period.all':'Barcha vaqt',
+  },
+  ru: {
+    'nav.dashboard':'Панель','nav.transactions':'Транзакции','nav.recurring':'Повторяющиеся',
+    'nav.goals':'Цели','nav.categories':'Категории','nav.budgets':'Бюджеты',
+    'nav.reports':'Отчёты','nav.family':'Семья',
+    'dashboard.title':'Панель','dashboard.overviewFor':'Обзор за',
+    'dashboard.balance':'Баланс','dashboard.income':'Доход','dashboard.expenses':'Расходы',
+    'dashboard.thisMonth':'Этот месяц','dashboard.last30Days':'Последние 30 дней','dashboard.allTime':'Всё время',
+    'dashboard.expenseBreakdown':'Разбивка расходов','dashboard.recentTransactions':'Последние транзакции',
+    'dashboard.topSpendingCategories':'Основные категории расходов','dashboard.viewAll':'Посмотреть все →',
+    'forecast.title':'Прогноз на следующий месяц','forecast.based':'На основе 3 месяцев',
+    'forecast.tip':'💡 Прогнозы основаны на ваших расходах.',
+    'forecast.predicted':'Прогноз','forecast.lastMonth':'Прошлый месяц','forecast.change':'Изменение',
+    'tagline':'Управляйте финансами','theme.dark':'Тёмная тема','theme.light':'Светлая тема',
+    'period.month':'Май 2026','period.last30':'Последние 30 дней','period.all':'Всё время',
+  },
+  en: {
+    'nav.dashboard':'Dashboard','nav.transactions':'Transactions','nav.recurring':'Recurring',
+    'nav.goals':'Goals','nav.categories':'Categories','nav.budgets':'Budgets',
+    'nav.reports':'Reports','nav.family':'Family',
+    'dashboard.title':'Dashboard','dashboard.overviewFor':'Overview for',
+    'dashboard.balance':'Balance','dashboard.income':'Income','dashboard.expenses':'Expenses',
+    'dashboard.thisMonth':'This Month','dashboard.last30Days':'Last 30 Days','dashboard.allTime':'All Time',
+    'dashboard.expenseBreakdown':'Expense Breakdown','dashboard.recentTransactions':'Recent Transactions',
+    'dashboard.topSpendingCategories':'Top Spending Categories','dashboard.viewAll':'View All →',
+    'forecast.title':'Next Month Forecast','forecast.based':'Based on last 3 months',
+    'forecast.tip':'💡 Forecasts are based on your spending patterns.',
+    'forecast.predicted':'Predicted','forecast.lastMonth':'Last Month','forecast.change':'Change',
+    'tagline':'Manage your finances','theme.dark':'Dark Mode','theme.light':'Light Mode',
+    'period.month':'May 2026','period.last30':'Last 30 days','period.all':'All time',
+  }
+};
+
+function t(key) { return T[lang][key] || key; }
+
+function catName(c) {
+  if (lang === 'ru') return c.nameRu;
+  if (lang === 'en') return c.nameEn;
+  return c.name;
+}
+function txName(tx) {
+  if (lang === 'ru') return tx.catRu;
+  if (lang === 'en') return tx.catEn;
+  return tx.cat;
+}
+
+// ─── CURRENCY ────────────────────────────────────────────────────────────────
+function fmt(uzs) {
+  const rate = RATES[curr];
+  const val = uzs * rate;
+  const sym = SYMBOLS[curr];
+  const nd = NO_DEC.includes(curr);
+  const opts = { minimumFractionDigits: nd?0:2, maximumFractionDigits: nd?0:2 };
+  const num = new Intl.NumberFormat('en-US', opts).format(Math.abs(val));
+  if (AFTER.includes(curr)) return `${num} ${sym}`;
+  return `${sym}${num}`;
+}
+
+// ─── RENDER ──────────────────────────────────────────────────────────────────
+function applyTranslations() {
+  document.querySelectorAll('[data-key]').forEach(el => {
+    el.textContent = t(el.dataset.key);
+  });
+  document.getElementById('tagline').textContent = t('tagline');
+  document.getElementById('periodLabel').textContent = t('period.' + viewMode);
+  document.getElementById('themeLabel').textContent = dark ? t('theme.light') : t('theme.dark');
+}
+
+function renderStats() {
+  const mul = viewMode === 'all' ? 24 : viewMode === 'last30' ? 1 : 1;
+  const inc = BASE_INCOME * (viewMode === 'all' ? 24 : 1);
+  const exp = BASE_EXPENSE * (viewMode === 'all' ? 24 : 1);
+  const bal = inc - exp;
+  document.getElementById('statBalance').textContent = (bal >= 0 ? '+' : '-') + fmt(Math.abs(bal));
+  document.getElementById('statBalance').className = 'stat-value ' + (bal >= 0 ? 'text-green' : 'text-red');
+  document.getElementById('statIncome').textContent = fmt(inc);
+  document.getElementById('statExpense').textContent = fmt(exp);
+}
+
+let pieInstance = null;
+function renderPie() {
+  const ctx = document.getElementById('pieChart').getContext('2d');
+  if (pieInstance) pieInstance.destroy();
+  pieInstance = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: CATS.map(c => catName(c)),
+      datasets: [{ data: CATS.map(c => c.val), backgroundColor: CATS.map(c => c.color), borderWidth: 2, borderColor: dark ? '#1e293b' : '#fff' }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, cutout: '45%',
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${fmt(ctx.raw)}` } } }
+    }
+  });
+  const grid = document.getElementById('legendGrid');
+  grid.innerHTML = CATS.map(c => `
+    <div class="legend-item">
+      <div class="legend-dot" style="background:${c.color}"></div>
+      <span>${catName(c)}</span>
+      <span class="legend-amount">${fmt(c.val)}</span>
+    </div>`).join('');
+}
+
+function renderForecast() {
+  document.getElementById('forecastList').innerHTML = FORECAST.map(f => {
+    const chg = ((f.forecast - f.last) / f.last * 100).toFixed(1);
+    const pos = parseFloat(chg) > 0;
+    return `<div class="forecast-item">
+      <div class="forecast-row">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="width:10px;height:10px;border-radius:50%;background:${f.color}"></div>
+          <span style="font-weight:600;font-size:14px;color:var(--text)">${lang==='ru'?f.catRu:lang==='en'?f.catEn:f.cat}</span>
+        </div>
+        <span style="font-size:18px">${pos ? '📈' : '📉'}</span>
+      </div>
+      <div class="forecast-vals">
+        <div class="forecast-val"><div class="label">${t('forecast.predicted')}</div><div class="value text-blue">${fmt(f.forecast)}</div></div>
+        <div class="forecast-val"><div class="label">${t('forecast.lastMonth')}</div><div class="value">${fmt(f.last)}</div></div>
+        <div class="forecast-val"><div class="label">${t('forecast.change')}</div><div class="value" style="color:${pos?'var(--red)':'var(--green)'}">${pos?'+':''}${chg}%</div></div>
+      </div>
+    </div>`;
+  }).join('');
+  document.querySelector('.tip-box').textContent = t('forecast.tip');
+}
+
+function renderTx() {
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  document.getElementById('txList').innerHTML = TXNS.map(tx => `
+    <div class="tx-item">
+      <div class="tx-left">
+        <div class="tx-icon" style="background:${tx.color}22">${tx.icon}</div>
+        <div>
+          <div class="tx-name">${txName(tx)}</div>
+          <div class="tx-date">${months[parseInt(tx.date.split('-')[1])-1]} ${tx.date.split('-')[2]}, ${tx.date.split('-')[0]}</div>
+        </div>
+      </div>
+      <div class="tx-amount" style="color:${tx.type==='income'?'var(--green)':'var(--red)'}">
+        ${tx.type==='income'?'+':'-'}${fmt(tx.amt)}
+      </div>
+    </div>`).join('');
+}
+
+function renderCats() {
+  const total = CATS.reduce((s,c) => s + c.val, 0);
+  document.getElementById('catList').innerHTML = CATS.map(c => {
+    const pct = (c.val / total * 100).toFixed(1);
+    return `<div class="progress-item">
+      <div class="progress-row">
+        <span>${c.icon} ${catName(c)}</span>
+        <span style="color:var(--sub)">${fmt(c.val)} (${pct}%)</span>
+      </div>
+      <div class="progress-track"><div class="progress-fill" style="width:${pct}%;background:${c.color}"></div></div>
+    </div>`;
+  }).join('');
+}
+
+function renderAll() {
+  applyTranslations();
+  renderStats();
+  renderPie();
+  renderForecast();
+  renderTx();
+  renderCats();
+}
+
+// ─── CONTROLS ────────────────────────────────────────────────────────────────
+function toggleDropdown(dropId, btnId) {
+  document.querySelectorAll('.dropdown').forEach(d => { if (d.id !== dropId) d.classList.remove('show'); });
+  document.querySelectorAll('.custom-select').forEach(b => { if (b.id !== btnId) b.classList.remove('open'); });
+  document.getElementById(dropId).classList.toggle('show');
+  document.getElementById(btnId).classList.toggle('open');
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('.select-wrap')) {
+    document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('show'));
+    document.querySelectorAll('.custom-select').forEach(b => b.classList.remove('open'));
+  }
+});
+
+function setLang(l, flag, name) {
+  lang = l;
+  document.getElementById('langFlag').textContent = flag;
+  document.getElementById('langName').textContent = name;
+  document.querySelectorAll('#langDrop .dropdown-item').forEach(el => el.classList.remove('selected'));
+  event.target.classList.add('selected');
+  document.getElementById('langDrop').classList.remove('show');
+  document.getElementById('langBtn').classList.remove('open');
+  renderAll();
+}
+
+function setCurr(c, flag) {
+  curr = c;
+  document.getElementById('currFlag').textContent = flag;
+  document.getElementById('currCode').textContent = c;
+  document.querySelectorAll('#currDrop .dropdown-item').forEach(el => el.classList.remove('selected'));
+  event.target.classList.add('selected');
+  document.getElementById('currDrop').classList.remove('show');
+  document.getElementById('currBtn').classList.remove('open');
+  renderAll();
+}
+
+function setView(mode, btn) {
+  viewMode = mode;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderAll();
+}
+
+function toggleTheme() {
+  dark = !dark;
+  document.body.classList.toggle('dark', dark);
+  document.getElementById('themeIcon').textContent = dark ? '☀️' : '🌙';
+  document.getElementById('themeLabel').textContent = dark ? t('theme.light') : t('theme.dark');
+  renderPie();
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+renderAll();
+</script>
+</body>
+</html>

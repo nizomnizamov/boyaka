@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Boyaka – Loyiha Strukturasi</title>
+<style>
+  :root {
+    --bg:#0f172a; --surface:#1e293b; --border:#334155;
+    --text:#f1f5f9; --sub:#94a3b8; --accent:#60a5fa;
+    --green:#4ade80; --yellow:#fbbf24; --red:#f87171;
+    --purple:#c084fc; --cyan:#22d3ee; --orange:#fb923c;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; font-family:'Segoe UI',system-ui,monospace; }
+  body { background:var(--bg); color:var(--text); min-height:100vh; padding:32px; }
+
+  h1 { font-size:22px; font-weight:700; color:var(--accent); margin-bottom:4px; }
+  .subtitle { color:var(--sub); font-size:13px; margin-bottom:28px; }
+
+  .layout { display:grid; grid-template-columns:1fr 1fr; gap:24px; max-width:1100px; }
+
+  .panel {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:14px; padding:20px; overflow:hidden;
+  }
+  .panel-title {
+    font-size:13px; font-weight:700; letter-spacing:.08em;
+    text-transform:uppercase; color:var(--sub); margin-bottom:14px;
+    padding-bottom:10px; border-bottom:1px solid var(--border);
+    display:flex; align-items:center; gap:8px;
+  }
+
+  /* Tree */
+  .tree { font-size:12.5px; line-height:1.9; }
+  .tree ul { list-style:none; padding-left:18px; }
+  .tree > ul { padding-left:0; }
+  .folder { cursor:pointer; user-select:none; display:flex; align-items:center; gap:5px; }
+  .folder:hover .fname { color:#fff; }
+  .fname { color:var(--cyan); font-weight:600; }
+  .fname.root { color:var(--accent); font-size:13.5px; }
+  .file { display:flex; align-items:center; gap:5px; color:var(--sub); }
+  .file:hover { color:#fff; }
+  .icon { font-size:13px; width:16px; text-align:center; flex-shrink:0; }
+  .badge {
+    font-size:9px; padding:1px 5px; border-radius:4px; font-weight:700;
+    margin-left:4px; letter-spacing:.04em;
+  }
+  .badge-new { background:rgba(74,222,128,.15); color:var(--green); }
+  .badge-mod { background:rgba(251,191,36,.12); color:var(--yellow); }
+  .badge-key { background:rgba(96,165,250,.12); color:var(--accent); }
+
+  li { margin:1px 0; }
+  .collapsed { display:none; }
+
+  /* Stats */
+  .stats { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:24px; max-width:1100px; }
+  .stat {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:12px; padding:16px; text-align:center;
+  }
+  .stat-n { font-size:28px; font-weight:800; color:var(--accent); }
+  .stat-l { font-size:12px; color:var(--sub); margin-top:2px; }
+
+  /* Legend */
+  .legend { display:flex; gap:16px; margin-bottom:20px; flex-wrap:wrap; }
+  .leg { display:flex; align-items:center; gap:5px; font-size:12px; color:var(--sub); }
+
+  /* Info box */
+  .info-box {
+    background:rgba(96,165,250,.07); border:1px solid rgba(96,165,250,.2);
+    border-radius:10px; padding:14px 16px; font-size:12.5px; color:var(--sub);
+    margin-bottom:20px; max-width:1100px; line-height:1.7;
+  }
+  .info-box strong { color:var(--accent); }
+
+  .full { grid-column:1/-1; }
+  .section-label {
+    font-size:11px; color:var(--purple); font-weight:700;
+    text-transform:uppercase; letter-spacing:.1em; margin:8px 0 4px 20px;
+  }
+</style>
+</head>
+<body>
+
+<h1>💎 Boyaka — Loyiha Strukturasi</h1>
+<p class="subtitle">aurora-ledger-main.zip asosida · Full-Stack (Node.js + React + PostgreSQL)</p>
+
+<div class="stats">
+  <div class="stat"><div class="stat-n">95</div><div class="stat-l">Jami fayl</div></div>
+  <div class="stat"><div class="stat-n">2</div><div class="stat-l">Asosiy qism (Frontend / Backend)</div></div>
+  <div class="stat"><div class="stat-n">16</div><div class="stat-l">API route</div></div>
+</div>
+
+<div class="legend">
+  <span class="leg"><span class="badge badge-new">NEW</span> Qo'shilgan fayl</span>
+  <span class="leg"><span class="badge badge-mod">MOD</span> O'zgartirilgan fayl</span>
+  <span class="leg"><span class="badge badge-key">KEY</span> Muhim fayl</span>
+</div>
+
+<div class="info-box">
+  Joriy loyihangiz zip faylga nisbatan <strong>yangroq versiya</strong>da — rate limiting, kuchli parol validatsiyasi,
+  OAuth xavfsizligi va valyuta konvertatsiyasi qo'shilgan.
+  Biz ham <strong>AED (Arab dirhami)</strong> va <strong>3 til</strong> (uz/ru/en) sozlaganmiz.
+</div>
+
+<div class="layout">
+
+  <!-- BACKEND -->
+  <div class="panel">
+    <div class="panel-title">⚙️ Backend (Node.js / Express)</div>
+    <div class="tree">
+      <ul>
+        <li>
+          <span class="folder" onclick="toggle('be-root')">
+            <span class="icon">📁</span><span class="fname root">backend/</span>
+          </span>
+          <ul id="be-root">
+            <li><span class="file"><span class="icon">🟢</span>server.js <span class="badge badge-mod">MOD</span></span></li>
+            <li><span class="file"><span class="icon">📄</span>env.example</span></li>
+
+            <li class="section-label">config/</li>
+            <li>
+              <span class="folder" onclick="toggle('be-config')">
+                <span class="icon">📁</span><span class="fname">config/</span>
+              </span>
+              <ul id="be-config">
+                <li><span class="file"><span class="icon">🗄️</span>database.js <span class="badge badge-key">KEY</span></span></li>
+                <li><span class="file"><span class="icon">🔑</span>passport.js <span class="badge badge-key">KEY</span></span></li>
+              </ul>
+            </li>
+
+            <li class="section-label">middleware/</li>
+            <li>
+              <span class="folder" onclick="toggle('be-mid')">
+                <span class="icon">📁</span><span class="fname">middleware/</span>
+              </span>
+              <ul id="be-mid">
+                <li><span class="file"><span class="icon">🛡️</span>auth.js <span class="badge badge-key">KEY</span></span></li>
+              </ul>
+            </li>
+
+            <li class="section-label">routes/ (16 ta API)</li>
+            <li>
+              <span class="folder" onclick="toggle('be-routes')">
+                <span class="icon">📁</span><span class="fname">routes/</span>
+              </span>
+              <ul id="be-routes">
+                <li><span class="file"><span class="icon">🔐</span>auth.js <span class="badge badge-mod">MOD</span></span></li>
+                <li><span class="file"><span class="icon">🔗</span>oauth.js <span class="badge badge-mod">MOD</span></span></li>
+                <li><span class="file"><span class="icon">🔑</span>password-reset.js</span></li>
+                <li><span class="file"><span class="icon">💸</span>transactions.js <span class="badge badge-key">KEY</span></span></li>
+                <li><span class="file"><span class="icon">💱</span>currency.js <span class="badge badge-key">KEY</span></span></li>
+                <li><span class="file"><span class="icon">📊</span>dashboard.js</span></li>
+                <li><span class="file"><span class="icon">🏷️</span>categories.js</span></li>
+                <li><span class="file"><span class="icon">📋</span>budgets.js</span></li>
+                <li><span class="file"><span class="icon">🎯</span>goals.js <span class="badge badge-mod">MOD</span></span></li>
+                <li><span class="file"><span class="icon">🔄</span>recurring.js</span></li>
+                <li><span class="file"><span class="icon">👨‍👩‍👧</span>families.js</span></li>
+                <li><span class="file"><span class="icon">🤝</span>family-shared.js</span></li>
+                <li><span class="file"><span class="icon">📈</span>reports.js</span></li>
+                <li><span class="file"><span class="icon">🔮</span>forecast.js</span></li>
+                <li><span class="file"><span class="icon">📉</span>trends.js</span></li>
+                <li><span class="file"><span class="icon">💡</span>insights.js</span></li>
+                <li><span class="file"><span class="icon">👤</span>profile.js</span></li>
+                <li><span class="file"><span class="icon">🔧</span>setup.js</span></li>
+                <li><span class="file"><span class="icon">🛠️</span>admin.js</span></li>
+              </ul>
+            </li>
+
+            <li class="section-label">utils/</li>
+            <li>
+              <span class="folder" onclick="toggle('be-utils')">
+                <span class="icon">📁</span><span class="fname">utils/</span>
+              </span>
+              <ul id="be-utils">
+                <li><span class="file"><span class="icon">💱</span>currency.js <span class="badge badge-mod">MOD</span></span></li>
+                <li><span class="file"><span class="icon">📧</span>email.js</span></li>
+                <li><span class="file"><span class="icon">🔄</span>recurring-processor.js <span class="badge badge-mod">MOD</span></span></li>
+              </ul>
+            </li>
+
+            <li class="section-label">migrations/ & scripts/</li>
+            <li>
+              <span class="folder" onclick="toggle('be-mig')">
+                <span class="icon">📁</span><span class="fname">migrations/ & scripts/</span>
+              </span>
+              <ul id="be-mig">
+                <li><span class="file"><span class="icon">🗃️</span>migrate.js <span class="badge badge-key">KEY</span></span></li>
+                <li><span class="file"><span class="icon">🗃️</span>ensure-tables.js</span></li>
+                <li><span class="file"><span class="icon">🌱</span>seed.js</span></li>
+                <li><span class="file"><span class="icon">📜</span>add_role_to_invite_codes.sql</span></li>
+                <li><span class="file"><span class="icon">⚙️</span>migrate-currency.js</span></li>
+                <li><span class="file"><span class="icon">⚙️</span>migrate-saving-goals.js</span></li>
+                <li><span class="file"><span class="icon">⚙️</span>migrate-family-sharing.js</span></li>
+                <li><span class="file"><span class="icon">⚙️</span>+ 8 ta migration skript...</span></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- FRONTEND -->
+  <div class="panel">
+    <div class="panel-title">🖥️ Frontend (React + Vite + Tailwind)</div>
+    <div class="tree">
+      <ul>
+        <li>
+          <span class="folder" onclick="toggle('fe-root')">
+            <span class="icon">📁</span><span class="fname root">frontend/</span>
+          </span>
+          <ul id="fe-root">
+            <li><span class="file"><span class="icon">🏠</span>index.html</span></li>
+            <li><span class="file"><span class="icon">⚡</span>vite.config.js</span></li>
+            <li><span class="file"><span class="icon">🎨</span>tailwind.config.js</span></li>
+
+            <li class="section-label">src/pages/ (17 sahifa)</li>
+            <li>
+              <span class="folder" onclick="toggle('fe-pages')">
+                <span class="icon">📁</span><span class="fname">pages/</span>
+              </span>
+              <ul id="fe-pages">
+                <li><span class="file"><span class="icon">🏠</span>Dashboard.jsx <span class="badge badge-key">KEY</span></span></li>
+                <li><span class="file"><span class="icon">💸</span>Transactions.jsx <span class="badge badge-key">KEY</span></span></li>
+                <li><span class="file"><span class="icon">📋</span>Budgets.jsx</span></li>
+                <li><span class="file"><span class="icon">🎯</span>Goals.jsx</span></li>
+                <li><span class="file"><span class="icon">🔄</span>Recurring.jsx <span class="badge badge-mod">MOD</span></span></li>
+                <li><span class="file"><span class="icon">🏷️</span>Categories.jsx</span></li>
+                <li><span class="file"><span class="icon">📈</span>Analytics.jsx</span></li>
+                <li><span class="file"><span class="icon">📊</span>Reports.jsx</span></li>
+                <li><span class="file"><span class="icon">👨‍👩‍👧</span>Family.jsx <span class="badge badge-mod">MOD</span></span></li>
+                <li><span class="file"><span class="icon">🤝</span>JoinFamily.jsx</span></li>
+                <li><span class="file"><span class="icon">👤</span>Profile.jsx</span></li>
+                <li><span class="file"><span class="icon">🔑</span>Login.jsx</span></li>
+                <li><span class="file"><span class="icon">📝</span>Register.jsx</span></li>
+                <li><span class="file"><span class="icon">🔗</span>AuthCallback.jsx <span class="badge badge-mod">MOD</span></span></li>
+                <li><span class="file"><span class="icon">🔒</span>ForgotPassword.jsx</span></li>
+                <li><span class="file"><span class="icon">🔓</span>ResetPassword.jsx</span></li>
+                <li><span class="file"><span class="icon">🛠️</span>Admin.jsx</span></li>
+              </ul>
+            </li>
+
+            <li class="section-label">src/components/ (11 komponent)</li>
+            <li>
+              <span class="folder" onclick="toggle('fe-comp')">
+                <span class="icon">📁</span><span class="fname">components/</span>
+              </span>
+              <ul id="fe-comp">
+                <li><span class="file"><span class="icon">🗂️</span>Layout.jsx <span class="badge badge-key">KEY</span></span></li>
+                <li><span class="file"><span class="icon">💱</span>CurrencySelector.jsx <span class="badge badge-mod">MOD</span></span></li>
+                <li><span class="file"><span class="icon">🌐</span>LanguageSelector.jsx <span class="badge badge-mod">MOD</span></span></li>
+                <li><span class="file"><span class="icon">🌙</span>ThemeToggle.jsx</span></li>
+                <li><span class="file"><span class="icon">💸</span>TransactionModal.jsx <span class="badge badge-mod">MOD</span></span></li>
+                <li><span class="file"><span class="icon">📋</span>BudgetModal.jsx <span class="badge badge-mod">MOD</span></span></li>
+                <li><span class="file"><span class="icon">🎯</span>GoalModal.jsx <span class="badge badge-mod">MOD</span></span></li>
+                <li><span class="file"><span class="icon">🏆</span>GoalCard.jsx</span></li>
+                <li><span class="file"><span class="icon">🤝</span>ContributionModal.jsx</span></li>
+                <li><span class="file"><span class="icon">🏷️</span>CategoryModal.jsx</span></li>
+                <li><span class="file"><span class="icon">⏳</span>LoadingSkeleton.jsx</span></li>
+              </ul>
+            </li>
+
+            <li class="section-label">src/context/ (3 context)</li>
+            <li>
+              <span class="folder" onclick="toggle('fe-ctx')">
+                <span class="icon">📁</span><span class="fname">context/</span>
+              </span>
+              <ul id="fe-ctx">
+                <li><span class="file"><span class="icon">🔐</span>AuthContext.jsx <span class="badge badge-key">KEY</span></span></li>
+                <li><span class="file"><span class="icon">💱</span>CurrencyContext.jsx <span class="badge badge-mod">MOD</span></span></li>
+                <li><span class="file"><span class="icon">🌙</span>ThemeContext.jsx</span></li>
+              </ul>
+            </li>
+
+            <li class="section-label">src/i18n/ (3 faol til)</li>
+            <li>
+              <span class="folder" onclick="toggle('fe-i18n')">
+                <span class="icon">📁</span><span class="fname">i18n/</span>
+              </span>
+              <ul id="fe-i18n">
+                <li><span class="file"><span class="icon">⚙️</span>config.js <span class="badge badge-mod">MOD</span></span></li>
+                <li><span class="file"><span class="icon">🇺🇿</span>locales/uz.json <span class="badge badge-new">NEW</span></span></li>
+                <li><span class="file"><span class="icon">🇷🇺</span>locales/ru.json</span></li>
+                <li><span class="file"><span class="icon">🇺🇸</span>locales/en.json</span></li>
+                <li><span class="file"><span class="icon">📦</span>locales/de, es, fr, ja, ko, pt, vi, zh (arxiv)</span></li>
+              </ul>
+            </li>
+
+            <li class="section-label">src/hooks/ & src/lib/ & src/utils/</li>
+            <li>
+              <span class="folder" onclick="toggle('fe-hooks')">
+                <span class="icon">📁</span><span class="fname">hooks/ lib/ utils/</span>
+              </span>
+              <ul id="fe-hooks">
+                <li><span class="file"><span class="icon">🪝</span>useTransactions.js <span class="badge badge-key">KEY</span></span></li>
+                <li><span class="file"><span class="icon">⌨️</span>useKeyboardShortcuts.js</span></li>
+                <li><span class="file"><span class="icon">🌐</span>api.js <span class="badge badge-key">KEY</span></span></li>
+                <li><span class="file"><span class="icon">🔑</span>tokenManager.js</span></li>
+                <li><span class="file"><span class="icon">🐛</span>debugAuth.js</span></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ARXITEKTURA -->
+  <div class="panel full">
+    <div class="panel-title">🏗️ Arxitektura sxemasi</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;text-align:center;font-size:12px;">
+
+      <div style="background:#0f172a;border:1px solid #334155;border-radius:10px;padding:14px;">
+        <div style="font-size:22px;margin-bottom:6px">🌐</div>
+        <div style="color:var(--cyan);font-weight:700;margin-bottom:6px">Foydalanuvchi</div>
+        <div style="color:var(--sub)">React SPA<br/>Vite + Tailwind<br/>React Query cache</div>
+      </div>
+
+      <div style="background:#0f172a;border:1px solid #334155;border-radius:10px;padding:14px;">
+        <div style="font-size:22px;margin-bottom:6px">⚙️</div>
+        <div style="color:var(--green);font-weight:700;margin-bottom:6px">API Server</div>
+        <div style="color:var(--sub)">Node.js / Express<br/>JWT Auth<br/>Rate Limiting</div>
+      </div>
+
+      <div style="background:#0f172a;border:1px solid #334155;border-radius:10px;padding:14px;">
+        <div style="font-size:22px;margin-bottom:6px">🗄️</div>
+        <div style="color:var(--purple);font-weight:700;margin-bottom:6px">Ma'lumotlar Bazasi</div>
+        <div style="color:var(--sub)">PostgreSQL<br/>Connection Pool<br/>Migration scripts</div>
+      </div>
+
+      <div style="background:#0f172a;border:1px solid #334155;border-radius:10px;padding:14px;">
+        <div style="font-size:22px;margin-bottom:6px">🔌</div>
+        <div style="color:var(--yellow);font-weight:700;margin-bottom:6px">Tashqi xizmatlar</div>
+        <div style="color:var(--sub)">Google OAuth<br/>ExchangeRate API<br/>Email (Nodemailer)</div>
+      </div>
+
+      <div style="grid-column:1/-1;border-top:1px solid #334155;padding-top:12px;margin-top:4px;">
+        <div style="display:flex;justify-content:center;gap:24px;flex-wrap:wrap;">
+          <span style="color:var(--mod,#fbbf24)">🌍 Tillar: <strong style="color:#fff">O'zbek · Русский · English</strong></span>
+          <span>💱 Valyutalar: <strong style="color:#fff">UZS · USD · RUB · JPY · CNY · EUR · AED</strong></span>
+          <span>🚀 Deploy: <strong style="color:#fff">Vercel (frontend) + Railway/Render (backend)</strong></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function toggle(id) {
+  const el = document.getElementById(id);
+  el.classList.toggle('collapsed');
+}
+// All open by default - good
+</script>
+</body>
+</html>
