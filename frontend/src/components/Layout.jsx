@@ -193,7 +193,7 @@ const BottomNav = ({ t, onMoreClick }) => {
           <div className="w-12 h-7 flex items-center justify-center">
             <Menu size={20} className="text-text-muted dark:text-dark-text-muted" strokeWidth={1.75} />
           </div>
-          <span className="text-[10px] font-semibold text-text-muted dark:text-dark-text-muted">Ko'proq</span>
+          <span className="text-[10px] font-semibold text-text-muted dark:text-dark-text-muted">{t('nav.more')}</span>
         </button>
       </div>
       <div className="pb-safe" />

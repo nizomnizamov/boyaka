@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-import { validateAndCleanupToken, getTokenExpirationMessage } from '../utils/tokenManager';
+import { validateAndCleanupToken } from '../utils/tokenManager';
 
 const AuthContext = createContext();
 
@@ -22,24 +22,18 @@ export const AuthProvider = ({ children }) => {
     const isValid = validateAndCleanupToken();
     
     if (!isValid) {
-      console.log('🔒 No valid token found, user remains logged out');
       setLoading(false);
       return;
     }
-    
+
     const token = localStorage.getItem('token');
     const userData = localStorage.getItem('user');
-    
+
     if (token && userData) {
       try {
         setUser(JSON.parse(userData));
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-        
-        // Log token expiration info
-        const expirationMsg = getTokenExpirationMessage();
-        console.log('✅ Valid token found:', expirationMsg);
-      } catch (error) {
-        console.error('Error parsing user data:', error);
+      } catch {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
       }
@@ -65,9 +59,9 @@ export const AuthProvider = ({ children }) => {
       toast.success('Xush kelibsiz! 👋');
       return true;
     } catch (error) {
+      // Xatoni qaytaramiz — Login sahifasi o'zi ko'rsatadi
       const message = error.response?.data?.error || "Email yoki parol noto'g'ri";
-      toast.error(message);
-      return false;
+      return { error: message };
     }
   };
 
@@ -89,9 +83,9 @@ export const AuthProvider = ({ children }) => {
       toast.success("Hisob muvaffaqiyatli yaratildi! 🎉");
       return true;
     } catch (error) {
+      // Xatoni qaytaramiz — Register sahifasi o'zi ko'rsatadi
       const message = error.response?.data?.error || "Ro'yxatdan o'tishda xatolik yuz berdi";
-      toast.error(message);
-      return false;
+      return { error: message };
     }
   };
 

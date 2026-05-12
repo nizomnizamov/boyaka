@@ -21,6 +21,7 @@ const Goals = () => {
   const [editingGoal, setEditingGoal] = useState(null);
   const [selectedGoal, setSelectedGoal] = useState(null);
   const [filter, setFilter] = useState('all');
+  const [deleteConfirmId, setDeleteConfirmId] = useState(null);
 
   useEffect(() => { fetchGoals(); }, [filter, currentCurrency]);
 
@@ -34,10 +35,21 @@ const Goals = () => {
     finally { setLoading(false); }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm(t('goals.deleteConfirm'))) return;
-    try { await api.delete(`/goals/${id}`); toast.success(t('goals.deleteSuccess')); fetchGoals(); }
-    catch { toast.error(t('common.error')); }
+  const handleDelete = (id) => {
+    setDeleteConfirmId(id);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteConfirmId) return;
+    try {
+      await api.delete(`/goals/${deleteConfirmId}`);
+      toast.success(t('goals.deleteSuccess'));
+      fetchGoals();
+    } catch {
+      toast.error(t('common.error'));
+    } finally {
+      setDeleteConfirmId(null);
+    }
   };
 
   const handleModalClose = () => {
@@ -177,6 +189,26 @@ const Goals = () => {
       {showGoalModal && <GoalModal goal={editingGoal} onClose={handleModalClose} />}
       {showContributionModal && selectedGoal && (
         <ContributionModal goal={selectedGoal} onClose={handleModalClose} />
+      )}
+
+      {/* ── Delete confirm modal ── */}
+      {deleteConfirmId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4" onClick={() => setDeleteConfirmId(null)}>
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+          <div className="card relative z-10 max-w-xs w-full text-center animate-scale-in" onClick={e => e.stopPropagation()}>
+            <div className="w-12 h-12 rounded-full bg-expense-light flex items-center justify-center mx-auto mb-3">
+              <Target size={22} className="text-expense" />
+            </div>
+            <h3 className="font-bold text-text-primary dark:text-dark-text-primary mb-1">Maqsadni o'chirish</h3>
+            <p className="text-sm text-text-secondary dark:text-dark-text-secondary mb-5">
+              Bu maqsad va unga bog'liq barcha ma'lumotlar o'chiriladi. Davom etasizmi?
+            </p>
+            <div className="flex gap-3">
+              <button onClick={() => setDeleteConfirmId(null)} className="btn btn-secondary flex-1">Bekor</button>
+              <button onClick={confirmDelete} className="btn flex-1 bg-expense text-white hover:bg-red-600">O'chirish</button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

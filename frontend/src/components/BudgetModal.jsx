@@ -45,8 +45,8 @@ const BudgetModal = ({ month, year, budget = null, onClose }) => {
     try {
       const response = await api.get('/categories?type=expense');
       setCategories(response.data);
-    } catch (error) {
-      console.error(error);
+    } catch {
+      // silent
     }
   };
 
@@ -58,26 +58,20 @@ const BudgetModal = ({ month, year, budget = null, onClose }) => {
       const data = {
         category_id: parseInt(formData.category_id),
         amount: parseFloat(formData.amount),
-        input_currency: formData.currency, // Currency user chose for input
+        input_currency: formData.currency,
         month: formData.month,
         year: formData.year
       };
 
-      console.log('💰 Creating budget with data:', data);
-
       if (budget) {
-        // Update existing budget
         await api.put(`/budgets/${budget.id}`, data);
         toast.success(t('budgets.budgetUpdated'));
       } else {
-        // Create new budget
         await api.post('/budgets', data);
         toast.success(t('budgets.budgetSet'));
       }
       onClose();
     } catch (error) {
-      console.error('❌ Budget operation error:', error);
-      console.error('❌ Response:', error.response?.data);
       toast.error(error.response?.data?.error || t('budgets.failedToSet'));
     } finally {
       setLoading(false);
@@ -117,9 +111,8 @@ const BudgetModal = ({ month, year, budget = null, onClose }) => {
       setShowQuickAdd(false);
       
       toast.success(t('categories.categoryCreated'));
-    } catch (error) {
+    } catch {
       toast.error(t('categories.failedToCreate'));
-      console.error(error);
     }
   };
 

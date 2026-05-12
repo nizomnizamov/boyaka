@@ -36,16 +36,19 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 app.use(cors({
   origin: function(origin, callback) {
-    // Allow requests with no origin (mobile apps, Postman, etc.)
+    // Allow requests with no origin (mobile apps, Postman, Capacitor, etc.)
     if (!origin) return callback(null, true);
-    
+
     const allowedOrigins = [
+      process.env.FRONTEND_URL,
       'https://aurora-ledger.vercel.app',
-      'http://localhost:5173',
-      'http://localhost:4173',
-      'http://localhost:3000'
-    ];
-    
+      'https://boyaka.app',
+      'http://localhost:5173',  // Vite dev
+      'http://localhost:4173',  // Vite preview
+      'http://localhost:3000',  // CRA
+      'http://localhost:8100',  // Capacitor
+    ].filter(Boolean);
+
     if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {

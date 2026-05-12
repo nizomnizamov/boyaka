@@ -19,7 +19,8 @@
     "admin": "Admin",
     "strategy": "Strategy",
     "debts": "P2P",
-    "business": "Business"
+    "business": "Business",
+    "more": "More"
   },
   "auth": {
     "login": "Login",

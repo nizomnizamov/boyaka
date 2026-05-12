@@ -6,22 +6,30 @@ import pool from '../config/database.js';
 
 const router = express.Router();
 
+// Auth config — frontend uchun (Google OAuth mavjudligini tekshirish)
+router.get('/config', (req, res) => {
+  res.json({
+    googleOAuth: !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET),
+    emailAuth:   true,
+  });
+});
+
 // Register
 router.post('/register',
   [
-    body('email').isEmail().normalizeEmail(),
+    body('email').isEmail().withMessage("Email manzili noto'g'ri").normalizeEmail(),
     body('password')
-      .isLength({ min: 8 }).withMessage('Password must be at least 8 characters')
-      .matches(/[A-Z]/).withMessage('Password must contain at least one uppercase letter')
-      .matches(/[a-z]/).withMessage('Password must contain at least one lowercase letter')
-      .matches(/[0-9]/).withMessage('Password must contain at least one number'),
-    body('full_name').trim().notEmpty()
+      .isLength({ min: 8 }).withMessage("Parol kamida 8 ta belgidan iborat bo'lishi kerak")
+      .matches(/[A-Z]/).withMessage("Parolda kamida 1 ta katta harf bo'lishi kerak")
+      .matches(/[a-z]/).withMessage("Parolda kamida 1 ta kichik harf bo'lishi kerak")
+      .matches(/[0-9]/).withMessage("Parolda kamida 1 ta raqam bo'lishi kerak"),
+    body('full_name').trim().notEmpty().withMessage("Ism familiya kiritilishi shart")
   ],
   async (req, res) => {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
+        return res.status(400).json({ error: errors.array()[0].msg });
       }
 
       const { email, password, full_name } = req.body;
@@ -29,7 +37,7 @@ router.post('/register',
       // Check if user exists
       const userExists = await pool.query('SELECT id FROM users WHERE email = $1', [email]);
       if (userExists.rows.length > 0) {
-        return res.status(400).json({ error: 'Email already registered' });
+        return res.status(400).json({ error: 'Bu email allaqachon ro\'yxatdan o\'tgan' });
       }
 
       // Hash password
@@ -96,14 +104,14 @@ router.post('/register',
 // Login
 router.post('/login',
   [
-    body('email').isEmail().normalizeEmail(),
-    body('password').notEmpty()
+    body('email').isEmail().withMessage("Email manzili noto'g'ri").normalizeEmail(),
+    body('password').notEmpty().withMessage('Parol kiritilishi shart')
   ],
   async (req, res) => {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
+        return res.status(400).json({ error: errors.array()[0].msg });
       }
 
       const { email, password } = req.body;
@@ -111,7 +119,7 @@ router.post('/login',
       // Find user
       const result = await pool.query('SELECT id, email, password, full_name, role FROM users WHERE email = $1', [email]);
       if (result.rows.length === 0) {
-        return res.status(401).json({ error: 'Invalid credentials' });
+        return res.status(401).json({ error: "Email yoki parol noto'g'ri" });
       }
 
       const user = result.rows[0];
@@ -119,7 +127,7 @@ router.post('/login',
       // Check password
       const validPassword = await bcrypt.compare(password, user.password);
       if (!validPassword) {
-        return res.status(401).json({ error: 'Invalid credentials' });
+        return res.status(401).json({ error: "Email yoki parol noto'g'ri" });
       }
 
       // Generate JWT with userId and role for middleware

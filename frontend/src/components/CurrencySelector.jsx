@@ -22,14 +22,10 @@ export default function CurrencySelector({ className = '' }) {
   const handleSelect = async (currencyCode) => {
     try {
       await setCurrency(currencyCode);
-      
-      // Invalidate all queries to refetch with new currency
       queryClient.invalidateQueries();
-      console.log('🔄 Currency changed, invalidating all caches...');
-      
       setIsOpen(false);
-    } catch (error) {
-      console.error('Error changing currency:', error);
+    } catch {
+      // silent — CurrencyContext o'zi xatoni boshqaradi
     }
   };
 

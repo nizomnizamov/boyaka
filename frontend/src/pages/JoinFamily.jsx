@@ -1,12 +1,10 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import api from '../lib/api';
 import toast from 'react-hot-toast';
-import { Users, Check, Loader2, AlertCircle } from 'lucide-react';
+import { Check, Loader2, AlertCircle } from 'lucide-react';
 
 export default function JoinFamily() {
-  const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
@@ -15,38 +13,20 @@ export default function JoinFamily() {
 
   const handleJoin = useCallback(async (code) => {
     try {
-      console.log('Attempting to join family with code:', code);
       setLoading(true);
       setError(null);
-      
       const response = await api.post('/families/join', { code: code.trim().toUpperCase() });
-      
-      console.log('Join response:', response.data);
       setFamilyInfo(response.data.family);
-      toast.success(response.data.message || 'Successfully joined family!');
-      
-      // Redirect to family page after 2 seconds
-      setTimeout(() => {
-        navigate('/family');
-      }, 2000);
+      toast.success(response.data.message || "Oilaga muvaffaqiyatli qo'shildingiz!");
+      setTimeout(() => navigate('/family'), 2000);
     } catch (err) {
-      console.error('Error joining family:', err);
-      console.error('Error response:', err.response?.data);
-      console.error('Error status:', err.response?.status);
-      
-      const errorMsg = err.response?.data?.error || 'Failed to join family';
-      
-      if (err.response?.status === 404) {
-        setError('Invalid or expired invite code. Please check the code and try again.');
-      } else if (err.response?.status === 400) {
-        setError(errorMsg);
-      } else if (err.response?.status === 403 || err.response?.status === 401) {
-        setError('Authentication error. Please log in first.');
+      const errorMsg = err.response?.data?.error || "Oilaga qo'shilishda xatolik";
+      if (err.response?.status === 401 || err.response?.status === 403) {
+        setError("Autentifikatsiya xatosi. Iltimos, tizimga qayta kiring.");
         setTimeout(() => navigate('/login'), 2000);
       } else {
         setError(errorMsg);
       }
-      
       toast.error(errorMsg);
       setLoading(false);
     }
@@ -54,29 +34,24 @@ export default function JoinFamily() {
 
   useEffect(() => {
     const code = searchParams.get('code');
-    
-    console.log('JoinFamily loaded, code from URL:', code);
-    
     if (!code) {
-      setError('No invite code provided in URL');
+      setError("URL da taklif kodi topilmadi");
       setLoading(false);
       return;
     }
-
-    // Auto-join with the code
     handleJoin(code);
   }, [searchParams, handleJoin]);
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#f9fafb' }}>
+      <div className="min-h-screen flex items-center justify-center bg-bg dark:bg-dark-bg">
         <div className="text-center">
-          <Loader2 className="h-16 w-16 text-blue-600 animate-spin mx-auto mb-4" />
-          <h2 className="text-2xl font-bold mb-2" style={{ color: '#111827' }}>
-            Joining Family...
+          <Loader2 className="h-14 w-14 text-primary animate-spin mx-auto mb-4" />
+          <h2 className="text-xl font-bold text-text-primary dark:text-dark-text-primary mb-1">
+            Oilaga qo'shilmoqda...
           </h2>
-          <p style={{ color: '#6b7280' }}>
-            Please wait while we process your invite
+          <p className="text-text-muted dark:text-dark-text-muted text-sm">
+            Iltimos, kuting
           </p>
         </div>
       </div>
@@ -85,89 +60,52 @@ export default function JoinFamily() {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#f9fafb' }}>
-        <div className="max-w-md w-full mx-4">
-          <div className="rounded-lg shadow-lg p-8" style={{ backgroundColor: '#ffffff' }}>
-            <div className="text-center">
-              <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: '#fee2e2' }}>
-                <AlertCircle className="h-8 w-8 text-red-600" />
-              </div>
-              <h2 className="text-2xl font-bold mb-2" style={{ color: '#111827' }}>
-                Unable to Join Family
-              </h2>
-              <p className="mb-4" style={{ color: '#6b7280' }}>
-                {error}
-              </p>
-              <div className="rounded p-3 mb-6 text-sm text-left" style={{ backgroundColor: '#f3f4f6' }}>
-                <p style={{ color: '#374151' }}>
-                  <strong>Invite Code:</strong> {searchParams.get('code') || 'Not found'}
-                </p>
-                <p className="mt-2 text-xs" style={{ color: '#9ca3af' }}>
-                  Check browser console (F12) for detailed error logs
-                </p>
-              </div>
-              <button
-                onClick={() => {
-                  const code = searchParams.get('code');
-                  if (code) {
-                    handleJoin(code);
-                  }
-                }}
-                className="w-full mb-3 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
-              >
-                Try Again
-              </button>
-              <div className="flex gap-3">
-                <button
-                  onClick={() => navigate('/family')}
-                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  Go to Families
-                </button>
-                <button
-                  onClick={() => navigate('/dashboard')}
-                  className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                >
-                  Dashboard
-                </button>
-              </div>
-            </div>
+      <div className="min-h-screen flex items-center justify-center bg-bg dark:bg-dark-bg px-4">
+        <div className="card max-w-sm w-full text-center">
+          <div className="w-14 h-14 rounded-full bg-expense-light flex items-center justify-center mx-auto mb-4">
+            <AlertCircle className="h-7 w-7 text-expense" />
+          </div>
+          <h2 className="text-lg font-bold text-text-primary dark:text-dark-text-primary mb-2">
+            Xatolik yuz berdi
+          </h2>
+          <p className="text-sm text-text-secondary dark:text-dark-text-secondary mb-5">{error}</p>
+          <div className="flex gap-3">
+            <button
+              onClick={() => { const code = searchParams.get('code'); if (code) handleJoin(code); }}
+              className="btn btn-primary flex-1"
+            >
+              Qayta urinish
+            </button>
+            <button onClick={() => navigate('/dashboard')} className="btn btn-secondary flex-1">
+              Bosh sahifa
+            </button>
           </div>
         </div>
       </div>
     );
   }
 
-  // Success state
   return (
-    <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#f9fafb' }}>
-      <div className="max-w-md w-full mx-4">
-        <div className="rounded-lg shadow-lg p-8" style={{ backgroundColor: '#ffffff' }}>
-          <div className="text-center">
-            <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: '#d1fae5' }}>
-              <Check className="h-8 w-8 text-green-600" />
-            </div>
-            <h2 className="text-2xl font-bold mb-2" style={{ color: '#111827' }}>
-              Successfully Joined!
-            </h2>
-            {familyInfo && (
-              <p className="mb-6" style={{ color: '#6b7280' }}>
-                Welcome to <span className="font-semibold">{familyInfo.name}</span>
-              </p>
-            )}
-            <p className="text-sm mb-6" style={{ color: '#9ca3af' }}>
-              Redirecting to family page...
-            </p>
-            <button
-              onClick={() => navigate('/family')}
-              className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              Go to Family Now
-            </button>
-          </div>
+    <div className="min-h-screen flex items-center justify-center bg-bg dark:bg-dark-bg px-4">
+      <div className="card max-w-sm w-full text-center">
+        <div className="w-14 h-14 rounded-full bg-income-light flex items-center justify-center mx-auto mb-4">
+          <Check className="h-7 w-7 text-income" />
         </div>
+        <h2 className="text-lg font-bold text-text-primary dark:text-dark-text-primary mb-2">
+          Muvaffaqiyatli qo'shildingiz!
+        </h2>
+        {familyInfo && (
+          <p className="text-sm text-text-secondary dark:text-dark-text-secondary mb-4">
+            <span className="font-semibold">{familyInfo.name}</span> oilasiga xush kelibsiz
+          </p>
+        )}
+        <p className="text-xs text-text-muted dark:text-dark-text-muted mb-5">
+          Oila sahifasiga yo'naltirilmoqda...
+        </p>
+        <button onClick={() => navigate('/family')} className="btn btn-primary w-full">
+          Oila sahifasiga o'tish
+        </button>
       </div>
     </div>
   );
 }
-

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCurrency } from '../context/CurrencyContext';
 import Layout from '../components/Layout';
@@ -60,7 +60,7 @@ export default function Family() {
         selectFamily(familiesRes.data.families[0].id);
       }
     } catch (error) {
-      console.error('Error fetching data:', error);
+      
       
       if (error.response?.status === 403 || error.response?.status === 401) {
         setAuthError(true);
@@ -90,7 +90,7 @@ export default function Family() {
           const codesRes = await api.get(`/families/${familyId}/invite-codes`);
           setInviteCodes(codesRes.data.inviteCodes || []);
         } catch (error) {
-          console.error('Error fetching invite codes:', error);
+          
           // Don't show error for invite codes, just set empty array
           setInviteCodes([]);
         }
@@ -99,7 +99,7 @@ export default function Family() {
         setInviteCodes([]);
       }
     } catch (error) {
-      console.error('Error fetching family details:', error);
+      
       const errorMsg = error.response?.data?.error || 'Failed to load family details';
       
       // Handle specific error cases
@@ -122,7 +122,7 @@ export default function Family() {
       setSharedBudgets(budgetsRes.data.budgets || []);
       setSharedGoals(goalsRes.data.goals || []);
     } catch (error) {
-      console.error('Error fetching shared data:', error);
+      
       setSharedBudgets([]);
       setSharedGoals([]);
     }
@@ -141,7 +141,7 @@ export default function Family() {
       setShowCreateModal(false);
       fetchData();
     } catch (error) {
-      console.error('Error creating family:', error);
+      
       toast.error(error.response?.data?.error || t('family.failedToCreate'));
     }
   };
@@ -159,7 +159,7 @@ export default function Family() {
       setShowInviteModal(false);
       selectFamily(selectedFamily);
     } catch (error) {
-      console.error('Error sending invitation:', error);
+      
       toast.error(error.response?.data?.error || t('family.failedToInvite'));
     }
   };
@@ -170,7 +170,7 @@ export default function Family() {
       toast.success(action === 'accept' ? t('family.inviteAccepted') : t('family.inviteDeclined'));
       fetchData();
     } catch (error) {
-      console.error(`Error ${action}ing invitation:`, error);
+      
       toast.error(t('family.failedToLoad'));
     }
   };
@@ -187,7 +187,7 @@ export default function Family() {
       setFamilyDetails(null);
       fetchData(); // Reload families list
     } catch (error) {
-      console.error('Error deleting family:', error);
+      
       toast.error(error.response?.data?.error || t('family.failedToDelete'));
     }
   };
@@ -210,7 +210,7 @@ export default function Family() {
         selectFamily(selectedFamily);
       }
     } catch (error) {
-      console.error('Error removing member:', error);
+      
       toast.error(error.response?.data?.error || t('family.failedToRemove'));
     }
   };
@@ -236,7 +236,7 @@ export default function Family() {
       
       selectFamily(selectedFamily);
     } catch (error) {
-      console.error('Error updating role:', error);
+      
       toast.error(error.response?.data?.error || t('family.failedToUpdateRole'));
     }
   };
@@ -251,7 +251,7 @@ export default function Family() {
       return;
     }
     
-    console.log('Generating invite code for family:', selectedFamily);
+    
     
     // Convert to int, treat 0 or empty as null (unlimited)
     const maxUses = formData.get('max_uses');
@@ -270,13 +270,13 @@ export default function Family() {
       
       const message = maxUsesValue || expiresValue 
         ? t('family.inviteCode.codeGenerated')
-        : `Unlimited invite code created! ♾️ (Role: ${t(`family.roles.${role}`)})`;
+        : `Unlimited invite code created! â™¾ï¸ (Role: ${t(`family.roles.${role}`)})`;
       toast.success(message);
       
       setShowGenerateCodeModal(false);
       selectFamily(selectedFamily);
     } catch (error) {
-      console.error('Error generating invite code:', error);
+      
       toast.error(error.response?.data?.error || t('family.inviteCode.failedToGenerate'));
     }
   };
@@ -291,7 +291,7 @@ export default function Family() {
       toast.success(t('family.inviteCode.codeDeactivated'));
       selectFamily(selectedFamily);
     } catch (error) {
-      console.error('Error deactivating code:', error);
+      
       toast.error(error.response?.data?.error || t('family.inviteCode.failedToDeactivate'));
     }
   };
@@ -323,7 +323,7 @@ export default function Family() {
       setShowJoinFamilyModal(false);
       fetchData();
     } catch (error) {
-      console.error('Error joining family:', error);
+      
       const errorMsg = error.response?.data?.error || t('family.inviteCode.failedToJoin');
       
       // More specific error messages
@@ -605,7 +605,7 @@ export default function Family() {
                       >
                         <div className="flex items-center gap-2">
                           <DollarSign className="h-4 w-4" />
-                          <span>Ngân sách chung</span>
+                          <span>NgÃ¢n sÃ¡ch chung</span>
                           <span className="ml-1 px-2 py-0.5 text-xs rounded-full bg-gray-200 dark:bg-gray-700">
                             {sharedBudgets.length}
                           </span>
@@ -621,7 +621,7 @@ export default function Family() {
                       >
                         <div className="flex items-center gap-2">
                           <Target className="h-4 w-4" />
-                          <span>Mục tiêu chung</span>
+                          <span>Má»¥c tiÃªu chung</span>
                           <span className="ml-1 px-2 py-0.5 text-xs rounded-full bg-gray-200 dark:bg-gray-700">
                             {sharedGoals.length}
                           </span>
@@ -857,10 +857,10 @@ export default function Family() {
                           <div className="text-center py-12">
                             <DollarSign className="h-16 w-16 text-gray-400 mx-auto mb-4" />
                             <p className="text-gray-600 dark:text-gray-400 mb-2">
-                              Chưa có ngân sách chung
+                              ChÆ°a cÃ³ ngÃ¢n sÃ¡ch chung
                             </p>
                             <p className="text-sm text-gray-500 dark:text-gray-500">
-                              Tạo ngân sách để quản lý chi tiêu chung
+                              Táº¡o ngÃ¢n sÃ¡ch Ä‘á»ƒ quáº£n lÃ½ chi tiÃªu chung
                             </p>
                           </div>
                         ) : (
@@ -877,7 +877,7 @@ export default function Family() {
                                         {isOver && <span className="text-xs px-2 py-0.5 bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 rounded-full">Limitdan oshdi!</span>}
                                       </div>
                                       <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-                                        {budget.category_name || 'Kategoriyasiz'} · {budget.period}
+                                        {budget.category_name || 'Kategoriyasiz'} Â· {budget.period}
                                       </p>
                                       <div className="mt-3">
                                         <div className="flex items-center justify-between text-sm mb-1">
@@ -893,7 +893,7 @@ export default function Family() {
                                           />
                                         </div>
                                         <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                                          Qoldi: {formatCurrency(Math.max(budget.amount - budget.spent, 0))} · {budget.created_by_name} tomonidan
+                                          Qoldi: {formatCurrency(Math.max(budget.amount - budget.spent, 0))} Â· {budget.created_by_name} tomonidan
                                         </p>
                                       </div>
                                     </div>
@@ -952,10 +952,10 @@ export default function Family() {
                           <div className="text-center py-12">
                             <Target className="h-16 w-16 text-gray-400 mx-auto mb-4" />
                             <p className="text-gray-600 dark:text-gray-400 mb-2">
-                              Chưa có mục tiêu chung
+                              ChÆ°a cÃ³ má»¥c tiÃªu chung
                             </p>
                             <p className="text-sm text-gray-500 dark:text-gray-500">
-                              Tạo mục tiêu để tiết kiệm cùng nhau
+                              Táº¡o má»¥c tiÃªu Ä‘á»ƒ tiáº¿t kiá»‡m cÃ¹ng nhau
                             </p>
                           </div>
                         ) : (
@@ -968,9 +968,9 @@ export default function Family() {
                                   <div className="flex items-start justify-between">
                                     <div className="flex-1">
                                       <div className="flex items-center gap-2">
-                                        <span className="text-xl">🎯</span>
+                                        <span className="text-xl">ðŸŽ¯</span>
                                         <h4 className="font-semibold text-gray-900 dark:text-white">{goal.name}</h4>
-                                        {isCompleted && <span className="text-xs px-2 py-0.5 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 rounded-full">✅ Bajarildi!</span>}
+                                        {isCompleted && <span className="text-xs px-2 py-0.5 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 rounded-full">âœ… Bajarildi!</span>}
                                       </div>
                                       {goal.description && (
                                         <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{goal.description}</p>
@@ -979,7 +979,7 @@ export default function Family() {
                                         <div className="flex items-center justify-between text-sm mb-1">
                                           <span className="text-gray-600 dark:text-gray-400">Jarayon</span>
                                           <span className="font-semibold">
-                                            {formatCurrency(goal.current_amount || 0)} / {formatCurrency(goal.target_amount)} · {pct.toFixed(1)}%
+                                            {formatCurrency(goal.current_amount || 0)} / {formatCurrency(goal.target_amount)} Â· {pct.toFixed(1)}%
                                           </span>
                                         </div>
                                         <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2.5">
@@ -1236,7 +1236,7 @@ export default function Family() {
                   <option value="observer">{t('family.roles.observer')} - {t('family.inviteCode.observerRoleDescription') || 'View only'}</option>
                 </select>
                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                  👥 All users joining via this link will get this role
+                  ðŸ‘¥ All users joining via this link will get this role
                 </p>
               </div>
               <div>
@@ -1251,7 +1251,7 @@ export default function Family() {
                   placeholder="0 = Unlimited"
                 />
                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                  💡 Leave empty or enter 0 for unlimited uses
+                  ðŸ’¡ Leave empty or enter 0 for unlimited uses
                 </p>
               </div>
               <div>
@@ -1266,7 +1266,7 @@ export default function Family() {
                   placeholder="0 = Never expires"
                 />
                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                  💡 Leave empty or enter 0 for permanent link
+                  ðŸ’¡ Leave empty or enter 0 for permanent link
                 </p>
               </div>
               <div className="flex gap-3">

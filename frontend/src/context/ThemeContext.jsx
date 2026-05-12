@@ -34,11 +34,7 @@ export function ThemeProvider({ children }) {
   }, [theme]);
 
   const toggleTheme = () => {
-    setTheme(prev => {
-      const newTheme = prev === 'light' ? 'dark' : 'light';
-      console.log(`🎨 Theme toggled: ${prev} → ${newTheme}`);
-      return newTheme;
-    });
+    setTheme(prev => (prev === 'light' ? 'dark' : 'light'));
   };
 
   const value = {

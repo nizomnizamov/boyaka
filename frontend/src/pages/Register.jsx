@@ -2,7 +2,19 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
-import { UserPlus, Eye, EyeOff } from 'lucide-react';
+import { UserPlus, Eye, EyeOff, AlertCircle, CheckCircle2, XCircle } from 'lucide-react';
+
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
+// Parol kuchini tekshirish (backend bilan mos)
+function checkPasswordStrength(pwd) {
+  return {
+    minLength:  pwd.length >= 8,
+    hasUpper:   /[A-Z]/.test(pwd),
+    hasLower:   /[a-z]/.test(pwd),
+    hasNumber:  /[0-9]/.test(pwd),
+  };
+}
 
 const Register = () => {
   const { t } = useTranslation();
@@ -21,14 +33,18 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (loading) return;
     setError('');
 
-    if (formData.password !== formData.confirmPassword) {
-      setError("Parollar mos kelmaydi");
+    const pwd = formData.password;
+    const strength = checkPasswordStrength(pwd);
+    if (!strength.minLength || !strength.hasUpper || !strength.hasLower || !strength.hasNumber) {
+      setError("Parol talablarga javob bermaydi");
       return;
     }
-    if (formData.password.length < 6) {
-      setError("Parol kamida 6 ta belgidan iborat bo'lishi kerak");
+    
+    if (formData.password !== formData.confirmPassword) {
+      setError("Parollar mos kelmaydi");
       return;
     }
     if (!formData.full_name.trim()) {
@@ -50,15 +66,17 @@ const Register = () => {
   };
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
     if (error) setError('');
   };
 
   const handleGoogleLogin = () => {
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-    const backendUrl = apiUrl.endsWith('/api') ? apiUrl.slice(0, -4) : apiUrl;
+    const backendUrl = API_BASE.endsWith('/api') ? API_BASE.slice(0, -4) : API_BASE;
     window.location.href = `${backendUrl}/api/auth/google`;
   };
+
+  // Parol kuchi ko'rsatkichi
+  const pwdStrength = checkPasswordStrength(formData.password);
 
   return (
     <div
@@ -152,19 +170,40 @@ const Register = () => {
                   onChange={handleChange}
                   className="input pr-12"
                   required
-                  placeholder="Kamida 6 ta belgi"
+                  placeholder="Kamida 8 ta belgi"
                   aria-required="true"
-                  minLength={6}
+                  minLength={8}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(v => !v)}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary dark:hover:text-dark-text-primary transition-colors"
                   aria-label={showPassword ? 'Parolni yashirish' : "Parolni ko'rsatish"}
+                  tabIndex={-1}
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
+              {/* Parol kuchi ko'rsatkichi */}
+              {formData.password.length > 0 && (
+                <div className="mt-2 space-y-1">
+                  {[
+                    { ok: pwdStrength.minLength, text: 'Kamida 8 ta belgi' },
+                    { ok: pwdStrength.hasUpper,  text: 'Katta harf (A-Z)' },
+                    { ok: pwdStrength.hasLower,  text: 'Kichik harf (a-z)' },
+                    { ok: pwdStrength.hasNumber, text: 'Raqam (0-9)' },
+                  ].map(item => (
+                    <div key={item.text} className="flex items-center gap-1.5">
+                      {item.ok
+                        ? <CheckCircle2 size={13} className="text-income shrink-0" />
+                        : <XCircle size={13} className="text-expense shrink-0" />}
+                      <span className={`text-xs font-medium ${item.ok ? 'text-income' : 'text-expense'}`}>
+                        {item.text}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Confirm password */}

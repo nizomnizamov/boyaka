@@ -19,7 +19,8 @@
     "admin": "Admin",
     "strategy": "Strategiya",
     "debts": "P2P",
-    "business": "Biznes"
+    "business": "Biznes",
+    "more": "Ko'proq"
   },
   "auth": {
     "login": "Kirish",

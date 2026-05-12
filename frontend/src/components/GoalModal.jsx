@@ -43,8 +43,7 @@ const GoalModal = ({ goal, onClose }) => {
       }
       onClose();
     } catch (error) {
-      console.error('Goal submit error:', error.response?.data);
-      const errorMsg = error.response?.data?.errors 
+      const errorMsg = error.response?.data?.errors
         ? error.response.data.errors.map(e => e.msg).join(', ')
         : error.response?.data?.error || t('common.error');
       toast.error(errorMsg);

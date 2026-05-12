@@ -48,7 +48,6 @@ const CategoryModal = ({ category, onClose }) => {
       onClose();
     } catch (error) {
       toast.error(category ? t('categories.failedToUpdate') : t('categories.failedToCreate'));
-      console.error(error);
     } finally {
       setLoading(false);
     }

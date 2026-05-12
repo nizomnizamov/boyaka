@@ -17,7 +17,8 @@
     "goals": "Цели Сбережений",
     "strategy": "Стратегия",
     "debts": "P2P",
-    "business": "Бизнес"
+    "business": "Бизнес",
+    "more": "Ещё"
   },
   "auth": {
     "login": "Войти",
