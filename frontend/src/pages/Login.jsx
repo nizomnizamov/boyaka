@@ -38,7 +38,7 @@ const Login = () => {
     const checkOAuth = async () => {
       try {
         // HEAD so'rov bilan tekshirish — agar 503 bo'lsa, yo'q
-        const res = await axios.get(`${API_BASE}/api/auth/config`).catch(() => null);
+        const res = await axios.get(`${API_BASE}/auth/config`).catch(() => null);
         if (res?.data?.googleOAuth === true) {
           setGoogleEnabled(true);
         } else {
