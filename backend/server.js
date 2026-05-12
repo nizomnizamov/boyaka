@@ -41,6 +41,7 @@ app.use(cors({
 
     const allowedOrigins = [
       process.env.FRONTEND_URL,
+      'https://boyaka-app.vercel.app',
       'https://aurora-ledger.vercel.app',
       'https://boyaka.app',
       'http://localhost:5173',  // Vite dev
@@ -49,7 +50,10 @@ app.use(cors({
       'http://localhost:8100',  // Capacitor
     ].filter(Boolean);
 
-    if (allowedOrigins.includes(origin)) {
+    // Allow Vercel preview deploys (*.vercel.app)
+    const isVercelPreview = origin && origin.endsWith('.vercel.app');
+
+    if (allowedOrigins.includes(origin) || isVercelPreview) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));

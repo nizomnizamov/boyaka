@@ -95,8 +95,11 @@ router.post('/register',
         }
       });
     } catch (error) {
-      console.error('Register error:', error);
-      res.status(500).json({ error: 'Server error' });
+      console.error('Register error:', error.message || error);
+      if (error.code === 'ECONNREFUSED' || error.code === 'ETIMEDOUT') {
+        return res.status(503).json({ error: "Ma'lumotlar bazasiga ulanib bo'lmadi. Keyinroq urinib ko'ring." });
+      }
+      res.status(500).json({ error: 'Server xatosi yuz berdi' });
     }
   }
 );
@@ -148,8 +151,11 @@ router.post('/login',
         }
       });
     } catch (error) {
-      console.error('Login error:', error);
-      res.status(500).json({ error: 'Server error' });
+      console.error('Login error:', error.message || error);
+      if (error.code === 'ECONNREFUSED' || error.code === 'ETIMEDOUT') {
+        return res.status(503).json({ error: "Ma'lumotlar bazasiga ulanib bo'lmadi. Keyinroq urinib ko'ring." });
+      }
+      res.status(500).json({ error: 'Server xatosi yuz berdi' });
     }
   }
 );

@@ -9,7 +9,10 @@ const isLocal = (process.env.DATABASE_URL || '').includes('localhost') || (proce
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: isLocal ? false : { rejectUnauthorized: false }
+  ssl: isLocal ? false : { rejectUnauthorized: false },
+  max: isLocal ? 20 : 5,                    // Supabase free tier: max 5 connections
+  idleTimeoutMillis: 30000,                  // 30s idle timeout
+  connectionTimeoutMillis: 10000,            // 10s connection timeout
 });
 
 // Test connection
@@ -18,9 +21,11 @@ pool.on('connect', () => {
 });
 
 pool.on('error', (err) => {
-  console.error('❌ Unexpected database error:', err);
-  process.exit(-1);
+  console.error('❌ Unexpected database error:', err.message);
+  // Don't crash on transient errors in production
+  if (isLocal) {
+    process.exit(-1);
+  }
 });
 
 export default pool;
-
