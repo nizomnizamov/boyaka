@@ -1,19 +1,32 @@
 import axios from 'axios';
 import pool from '../config/database.js';
 
-const API_KEY = process.env.EXCHANGE_RATE_API_KEY;
+const API_KEY = process.env.EXCHANGE_RATE_API_KEY || null;
 if (!API_KEY) {
-  console.error('FATAL: EXCHANGE_RATE_API_KEY environment variable is not set');
-  process.exit(1);
+  console.warn('⚠️  EXCHANGE_RATE_API_KEY not set — currency conversion will use fallback rates');
 }
 const BASE_URL = 'https://v6.exchangerate-api.com/v6';
 
 // Get exchange rate with caching
+// Static fallback rates (USD base) — API key bo'lmasa ishlatiladi
+const FALLBACK_RATES = {
+  'USD_UZS': 12700, 'USD_RUB': 90, 'USD_EUR': 0.92,
+  'USD_AED': 3.67,  'USD_JPY': 149, 'USD_CNY': 7.24,
+  'UZS_USD': 1/12700, 'RUB_USD': 1/90, 'EUR_USD': 1/0.92,
+  'AED_USD': 1/3.67,  'JPY_USD': 1/149, 'CNY_USD': 1/7.24,
+};
+
 export async function getExchangeRate(fromCurrency, toCurrency) {
   try {
     // If same currency, return 1
     if (fromCurrency === toCurrency) {
       return 1;
+    }
+
+    // No API key — use fallback rates
+    if (!API_KEY) {
+      const key = `${fromCurrency}_${toCurrency}`;
+      return FALLBACK_RATES[key] || 1;
     }
 
     // Check cache first (valid for 24 hours)
@@ -53,6 +66,10 @@ export async function getExchangeRate(fromCurrency, toCurrency) {
 
 // Get all rates for a base currency
 export async function getAllRates(baseCurrency) {
+  if (!API_KEY) {
+    // Return static fallback rates
+    return { USD: 1, UZS: 12700, RUB: 90, EUR: 0.92, AED: 3.67, JPY: 149, CNY: 7.24 };
+  }
   try {
     const response = await axios.get(
       `${BASE_URL}/${API_KEY}/latest/${baseCurrency}`
