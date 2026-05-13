@@ -96,10 +96,10 @@ router.post('/register',
       });
     } catch (error) {
       console.error('Register error:', error.message || error);
-      if (error.code === 'ECONNREFUSED' || error.code === 'ETIMEDOUT') {
+      if (error.code === 'ECONNREFUSED' || error.code === 'ETIMEDOUT' || error.code === 'ENOTFOUND') {
         return res.status(503).json({ error: "Ma'lumotlar bazasiga ulanib bo'lmadi. Keyinroq urinib ko'ring." });
       }
-      res.status(500).json({ error: 'Server xatosi yuz berdi' });
+      res.status(500).json({ error: 'Server xatosi yuz berdi', debug: process.env.NODE_ENV === 'production' ? error.message : undefined });
     }
   }
 );
@@ -152,10 +152,10 @@ router.post('/login',
       });
     } catch (error) {
       console.error('Login error:', error.message || error);
-      if (error.code === 'ECONNREFUSED' || error.code === 'ETIMEDOUT') {
+      if (error.code === 'ECONNREFUSED' || error.code === 'ETIMEDOUT' || error.code === 'ENOTFOUND') {
         return res.status(503).json({ error: "Ma'lumotlar bazasiga ulanib bo'lmadi. Keyinroq urinib ko'ring." });
       }
-      res.status(500).json({ error: 'Server xatosi yuz berdi' });
+      res.status(500).json({ error: 'Server xatosi yuz berdi', debug: process.env.NODE_ENV === 'production' ? error.message : undefined });
     }
   }
 );
