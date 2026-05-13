@@ -174,9 +174,11 @@ CREATE TABLE IF NOT EXISTS strategy_items (
 CREATE TABLE IF NOT EXISTS business_accounts (
   id          SERIAL PRIMARY KEY,
   owner_id    INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  created_by  INTEGER REFERENCES users(id) ON DELETE SET NULL,
   name        VARCHAR(255) NOT NULL,
   description TEXT,
   currency    VARCHAR(3) DEFAULT 'USD',
+  invite_code VARCHAR(20) UNIQUE,
   created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -187,6 +189,10 @@ CREATE TABLE IF NOT EXISTS business_members (
   user_id            INTEGER REFERENCES users(id) ON DELETE CASCADE,
   role               VARCHAR(20) DEFAULT 'member',
   profit_share       DECIMAL(5, 2) DEFAULT 0,
+  status             VARCHAR(20) DEFAULT 'active',
+  invited_by         INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  invited_at         TIMESTAMP,
+  joined_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   created_at         TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   UNIQUE(business_id, user_id)
 );

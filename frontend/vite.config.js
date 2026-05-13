@@ -96,9 +96,13 @@ export default defineConfig({
             },
           },
         ],
-        // Offline fallback
-        navigateFallback: '/offline.html',
+        // SPA fallback — barcha navigation request lar index.html ga yo'naltiriladi
+        navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/api\//, /^\/auth\//],
+        // Eski cache ni avtomatik tozalash
+        cleanupOutdatedCaches: true,
+        skipWaiting: true,
+        clientsClaim: true,
       },
       devOptions: {
         enabled: false, // dev da service worker o'chiq (debugging oson bo'lsin)
