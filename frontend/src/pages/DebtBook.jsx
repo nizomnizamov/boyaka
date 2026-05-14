@@ -299,7 +299,7 @@ const DebtCard = ({ debt, onEdit, onDelete, onPay, onRefresh }) => {
               : isLent  ? 'text-green-600 dark:text-green-400'
                         : 'text-red-600 dark:text-red-400'
             }`}>
-              {debt.amount.toLocaleString()} {debt.currency}
+              {parseFloat(debt.amount).toLocaleString()} {debt.currency}
             </p>
             {!isSettled && remaining < total && (
               <p className="text-xs text-gray-400">{t('debt.remaining')}: {remaining.toLocaleString()} {debt.currency}</p>

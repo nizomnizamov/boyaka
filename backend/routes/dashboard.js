@@ -198,10 +198,10 @@ router.get('/stats', authMiddleware, async (req, res) => {
       FROM budgets b
       LEFT JOIN transactions t ON b.category_id = t.category_id 
         AND t.type = 'expense'
-        AND DATE_TRUNC('month', t.transaction_date) = DATE_TRUNC('month', b.month)
+        AND EXTRACT(MONTH FROM t.transaction_date)::int = b.month AND EXTRACT(YEAR FROM t.transaction_date)::int = b.year
         AND t.user_id = b.user_id
       WHERE b.user_id = $1
-        AND DATE_TRUNC('month', b.month) = DATE_TRUNC('month', CURRENT_DATE)
+        AND b.month = EXTRACT(MONTH FROM CURRENT_DATE)::int AND b.year = EXTRACT(YEAR FROM CURRENT_DATE)::int
       GROUP BY b.id, b.amount, b.currency, t.currency
     `, [userId]);
 
@@ -243,10 +243,10 @@ router.get('/stats', authMiddleware, async (req, res) => {
         FROM budgets b
         LEFT JOIN transactions t ON b.category_id = t.category_id 
           AND t.type = 'expense'
-          AND DATE_TRUNC('month', t.transaction_date) = DATE_TRUNC('month', b.month)
+          AND EXTRACT(MONTH FROM t.transaction_date)::int = b.month AND EXTRACT(YEAR FROM t.transaction_date)::int = b.year
           AND t.user_id = b.user_id
         WHERE b.user_id = $1
-          AND DATE_TRUNC('month', b.month) = DATE_TRUNC('month', CURRENT_DATE)
+          AND b.month = EXTRACT(MONTH FROM CURRENT_DATE)::int AND b.year = EXTRACT(YEAR FROM CURRENT_DATE)::int
         GROUP BY b.id, b.amount
       ) AS budget_health
     `, [userId]);
@@ -300,7 +300,7 @@ router.get('/stats', authMiddleware, async (req, res) => {
         r.amount,
         r.currency,
         r.frequency,
-        r.next_date,
+        r.next_occurrence,
         r.description,
         c.name as category_name,
         c.color as category_color
@@ -308,8 +308,8 @@ router.get('/stats', authMiddleware, async (req, res) => {
       LEFT JOIN categories c ON r.category_id = c.id
       WHERE r.user_id = $1 
         AND r.is_active = true
-        AND r.next_date <= CURRENT_DATE + INTERVAL '7 days'
-      ORDER BY r.next_date ASC
+        AND r.next_occurrence <= CURRENT_DATE + INTERVAL '7 days'
+      ORDER BY r.next_occurrence ASC
       LIMIT 3
     `, [userId]);
 

@@ -458,7 +458,7 @@ router.put('/:id/transactions/:tid', authMiddleware, async (req, res) => {
          project_id=COALESCE($1,project_id), type=COALESCE($2,type),
          amount=COALESCE($3,amount), currency=COALESCE($4,currency),
          description=COALESCE($5,description), category=COALESCE($6,category),
-         date=COALESCE($7,date)
+         date=COALESCE($7,date), transaction_date=COALESCE($7,transaction_date)
        WHERE id=$8 AND business_id=$9 RETURNING *`,
       [project_id, type, amount, currency, description, category, date, tid, id]
     );
@@ -493,24 +493,28 @@ router.get('/:id/distributions', authMiddleware, async (req, res) => {
 
     const { rows } = await pool.query(
       `SELECT pd.*, u.full_name as created_by_name,
-              json_agg(json_build_object(
-                'user_id', pds.user_id,
-                'full_name', usr.full_name,
-                'profit_share', pds.profit_share,
-                'amount', pds.amount,
-                'paid', pds.paid
-              )) as shares
+              COALESCE(
+                json_agg(json_build_object(
+                  'user_id', pds.user_id,
+                  'full_name', usr.full_name,
+                  'profit_share', pds.profit_share,
+                  'amount', pds.amount,
+                  'paid', pds.paid
+                )) FILTER (WHERE pds.id IS NOT NULL),
+                '[]'::json
+              ) as shares
        FROM profit_distributions pd
        LEFT JOIN users u ON pd.created_by=u.id
        LEFT JOIN profit_distribution_shares pds ON pd.id=pds.distribution_id
        LEFT JOIN users usr ON pds.user_id=usr.id
        WHERE pd.business_id=$1
        GROUP BY pd.id, u.full_name
-       ORDER BY pd.created_at DESC`,
+       ORDER BY pd.distributed_at DESC`,
       [id]
     );
     res.json({ distributions: rows });
   } catch (err) {
+    console.error('Distributions error:', err.message);
     res.status(500).json({ error: 'Failed to fetch distributions' });
   }
 });
@@ -534,7 +538,7 @@ router.post('/:id/distribute', authMiddleware, async (req, res) => {
          COALESCE(SUM(CASE WHEN type='income' THEN amount ELSE 0 END),0) as total_income,
          COALESCE(SUM(CASE WHEN type='expense' THEN amount ELSE 0 END),0) as total_expense
        FROM business_transactions
-       WHERE business_id=$1 AND date BETWEEN $2 AND $3`,
+       WHERE business_id=$1 AND COALESCE(date, transaction_date) BETWEEN $2 AND $3`,
       [id, period_start, period_end]
     );
     const { total_income, total_expense } = totals[0];
@@ -549,9 +553,9 @@ router.post('/:id/distribute', authMiddleware, async (req, res) => {
     await client.query('BEGIN');
 
     const { rows: distRows } = await client.query(
-      `INSERT INTO profit_distributions(business_id, period_start, period_end, total_income, total_expense, net_profit, currency, note, created_by)
-       VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *`,
-      [id, period_start, period_end, total_income, total_expense, net_profit, currency, note, req.user.id]
+      `INSERT INTO profit_distributions(business_id, period_start, period_end, total_amount, total_income, total_expense, net_profit, currency, note, created_by)
+       VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING *`,
+      [id, period_start, period_end, net_profit, total_income, total_expense, net_profit, currency, note, req.user.id]
     );
     const dist = distRows[0];
 
