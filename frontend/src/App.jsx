@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'r
 import { Toaster } from 'react-hot-toast';
 import { Suspense, lazy, useEffect } from 'react';
 import { AuthProvider } from './context/AuthContext';
+import { warmupBackend } from './lib/api';
 import { CurrencyProvider } from './context/CurrencyContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { useAuth } from './context/AuthContext';
@@ -95,6 +96,11 @@ function CapacitorBackHandler() {
 
 // ─── App ───────────────────────────────────────────────────────────────────────
 function App() {
+  // Backend ni darhol uyg'otish (Render cold start ni minimallashtirish)
+  useEffect(() => {
+    warmupBackend();
+  }, []);
+
   return (
     <ErrorBoundary>
       <ThemeProvider>

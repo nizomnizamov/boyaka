@@ -153,6 +153,20 @@ cron.schedule('5 0 * * *', async () => {
   }
 });
 
+// Keep-alive cron: Render free tier 15 daqiqa ishlatilmasa uxlab qoladi
+// Har 12 daqiqada o'zini ping qilib uyg'oq tutadi (production da)
+if (process.env.NODE_ENV === 'production' && process.env.BACKEND_URL) {
+  cron.schedule('*/12 * * * *', async () => {
+    try {
+      const url = `${process.env.BACKEND_URL.replace(/\/$/, '')}/health`;
+      const res = await fetch(url);
+      if (res.ok) console.log('💚 Self-ping ok');
+    } catch (err) {
+      console.error('Self-ping failed:', err.message);
+    }
+  });
+}
+
 // Also run on server startup (optional, for immediate processing)
 if (process.env.PROCESS_RECURRING_ON_STARTUP === 'true') {
   console.log('🔄 Processing recurring transactions on startup...');

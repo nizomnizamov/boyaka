@@ -18,5 +18,7 @@ services:
         value: 7d
       - key: FRONTEND_URL
         sync: false
+      - key: BACKEND_URL
+        value: https://boyaka-1.onrender.com
       - key: PROCESS_RECURRING_ON_STARTUP
         value: false
