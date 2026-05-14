@@ -234,7 +234,9 @@
     "currency": "Currency",
     "date": "Date",
     "note": "Note",
-    "amount": "Amount"
+    "amount": "Amount",
+    "saving": "Saving...",
+    "update": "Update"
   },
   "recurring": {
     "title": "Recurring Transactions",

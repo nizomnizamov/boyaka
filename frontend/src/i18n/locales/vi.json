@@ -230,7 +230,9 @@
     "currency": "Mệnh giá",
     "date": "Ngày",
     "note": "Ghi chú",
-    "amount": "Số tiền"
+    "amount": "Số tiền",
+    "saving": "Đang lưu...",
+    "update": "Cập nhật"
   },
   "recurring": {
     "title": "Giao dịch định kỳ",

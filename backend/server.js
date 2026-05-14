@@ -101,16 +101,9 @@ app.get('/health', async (req, res) => {
     const result = await import('./config/database.js').then(m => m.default.query('SELECT 1 as ok'));
     dbStatus = result.rows[0]?.ok === 1 ? 'connected' : 'error';
   } catch (err) {
-    dbStatus = `error: ${err.message}`;
+    dbStatus = 'error';
   }
-  res.json({
-    status: 'ok',
-    timestamp: new Date().toISOString(),
-    database: dbStatus,
-    hasDbUrl: !!process.env.DATABASE_URL,
-    hasJwtSecret: !!process.env.JWT_SECRET,
-    frontendUrl: process.env.FRONTEND_URL || 'NOT SET',
-  });
+  res.json({ status: 'ok', timestamp: new Date().toISOString(), database: dbStatus });
 });
 
 // Routes

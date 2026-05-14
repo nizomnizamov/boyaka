@@ -234,7 +234,9 @@
     "currency": "Valyuta",
     "date": "Sana",
     "note": "Izoh",
-    "amount": "Miqdor"
+    "amount": "Miqdor",
+    "saving": "Saqlanmoqda...",
+    "update": "Yangilash"
   },
   "recurring": {
     "title": "Takroriy Tranzaksiyalar",

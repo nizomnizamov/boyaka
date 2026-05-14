@@ -230,7 +230,9 @@
     "currency": "货币",
     "date": "日期",
     "note": "备注",
-    "amount": "金额"
+    "amount": "金额",
+    "saving": "保存中...",
+    "update": "更新"
   },
   "recurring": {
     "title": "定期交易",

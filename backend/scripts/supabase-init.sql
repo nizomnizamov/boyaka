@@ -83,6 +83,9 @@ CREATE TABLE IF NOT EXISTS saving_goals (
   current_amount DECIMAL(20, 2) DEFAULT 0,
   currency       VARCHAR(3) DEFAULT 'USD',
   target_date    DATE,
+  deadline       DATE,
+  category       VARCHAR(100),
+  priority       VARCHAR(20) DEFAULT 'medium',
   is_completed   BOOLEAN DEFAULT false,
   color          VARCHAR(7) DEFAULT '#3B82F6',
   icon           VARCHAR(50) DEFAULT 'target',
@@ -98,6 +101,7 @@ CREATE TABLE IF NOT EXISTS saving_goals_contributions (
   currency          VARCHAR(3) DEFAULT 'USD',
   note              TEXT,
   contribution_date DATE NOT NULL,
+  transaction_id    INTEGER REFERENCES transactions(id) ON DELETE SET NULL,
   created_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -105,13 +109,16 @@ CREATE TABLE IF NOT EXISTS saving_goals_contributions (
 CREATE TABLE IF NOT EXISTS debts (
   id           SERIAL PRIMARY KEY,
   user_id      INTEGER REFERENCES users(id) ON DELETE CASCADE,
-  contact_name VARCHAR(255) NOT NULL,
+  contact_name VARCHAR(255),
+  person_name  VARCHAR(255) NOT NULL,
   amount       DECIMAL(20, 2) NOT NULL,
+  paid_amount  DECIMAL(20, 2) DEFAULT 0,
   currency     VARCHAR(3) DEFAULT 'USD',
   type         VARCHAR(20) NOT NULL CHECK (type IN ('lent', 'borrowed')),
   description  TEXT,
+  date         DATE,
   due_date     DATE,
-  status       VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'paid', 'partial')),
+  status       VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'paid', 'partial', 'settled')),
   created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -122,7 +129,8 @@ CREATE TABLE IF NOT EXISTS debt_payments (
   amount       DECIMAL(20, 2) NOT NULL,
   currency     VARCHAR(3) DEFAULT 'USD',
   note         TEXT,
-  payment_date DATE NOT NULL,
+  date         DATE NOT NULL,
+  payment_date DATE,
   created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -159,15 +167,15 @@ CREATE TABLE IF NOT EXISTS financial_strategies (
 );
 
 CREATE TABLE IF NOT EXISTS strategy_items (
-  id          SERIAL PRIMARY KEY,
-  strategy_id INTEGER REFERENCES financial_strategies(id) ON DELETE CASCADE,
-  category_id INTEGER REFERENCES categories(id) ON DELETE SET NULL,
-  name        VARCHAR(255) NOT NULL,
-  percentage  DECIMAL(5, 2),
-  amount      DECIMAL(20, 2),
-  description TEXT,
-  order_index INTEGER DEFAULT 0,
-  created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  id                 SERIAL PRIMARY KEY,
+  strategy_id        INTEGER REFERENCES financial_strategies(id) ON DELETE CASCADE,
+  category_id        INTEGER REFERENCES categories(id) ON DELETE SET NULL,
+  name               VARCHAR(255) NOT NULL,
+  target_percentage  DECIMAL(5, 2),
+  amount             DECIMAL(20, 2),
+  description        TEXT,
+  order_index        INTEGER DEFAULT 0,
+  created_at         TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ── 11. BUSINESS ─────────────────────────────────────────────
@@ -202,7 +210,14 @@ CREATE TABLE IF NOT EXISTS business_projects (
   business_id INTEGER REFERENCES business_accounts(id) ON DELETE CASCADE,
   name        VARCHAR(255) NOT NULL,
   description TEXT,
+  client_name VARCHAR(255),
+  budget      DECIMAL(20, 2) DEFAULT 0,
+  currency    VARCHAR(3) DEFAULT 'USD',
+  start_date  DATE,
+  end_date    DATE,
+  color       VARCHAR(7) DEFAULT '#3B82F6',
   status      VARCHAR(20) DEFAULT 'active',
+  created_by  INTEGER REFERENCES users(id) ON DELETE SET NULL,
   created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -214,7 +229,9 @@ CREATE TABLE IF NOT EXISTS business_transactions (
   type             VARCHAR(20) NOT NULL CHECK (type IN ('income', 'expense')),
   amount           DECIMAL(20, 2) NOT NULL,
   currency         VARCHAR(3) DEFAULT 'USD',
+  category         VARCHAR(100),
   description      TEXT,
+  date             DATE,
   transaction_date DATE NOT NULL,
   created_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -223,10 +240,14 @@ CREATE TABLE IF NOT EXISTS profit_distributions (
   id              SERIAL PRIMARY KEY,
   business_id     INTEGER REFERENCES business_accounts(id) ON DELETE CASCADE,
   total_amount    DECIMAL(20, 2) NOT NULL,
+  total_income    DECIMAL(20, 2),
+  total_expense   DECIMAL(20, 2),
+  net_profit      DECIMAL(20, 2),
   currency        VARCHAR(3) DEFAULT 'USD',
   period_start    DATE,
   period_end      DATE,
   note            TEXT,
+  created_by      INTEGER REFERENCES users(id) ON DELETE SET NULL,
   distributed_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -235,14 +256,19 @@ CREATE TABLE IF NOT EXISTS profit_distribution_shares (
   distribution_id INTEGER REFERENCES profit_distributions(id) ON DELETE CASCADE,
   user_id         INTEGER REFERENCES users(id) ON DELETE CASCADE,
   amount          DECIMAL(20, 2) NOT NULL,
-  percentage      DECIMAL(5, 2)
+  percentage      DECIMAL(5, 2),
+  profit_share    DECIMAL(5, 2),
+  currency        VARCHAR(3) DEFAULT 'USD',
+  paid            BOOLEAN DEFAULT false
 );
 
 -- ── 12. FAMILIES ─────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS families (
   id          SERIAL PRIMARY KEY,
   name        VARCHAR(255) NOT NULL,
+  description TEXT,
   owner_id    INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  created_by  INTEGER REFERENCES users(id) ON DELETE SET NULL,
   currency    VARCHAR(3) DEFAULT 'USD',
   created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -253,8 +279,11 @@ CREATE TABLE IF NOT EXISTS family_members (
   family_id   INTEGER REFERENCES families(id) ON DELETE CASCADE,
   user_id     INTEGER REFERENCES users(id) ON DELETE CASCADE,
   role        VARCHAR(20) DEFAULT 'member',
+  status      VARCHAR(20) DEFAULT 'active',
   can_add_transactions BOOLEAN DEFAULT true,
   can_manage_budget    BOOLEAN DEFAULT false,
+  invited_by  INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  invited_at  TIMESTAMP,
   joined_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   UNIQUE(family_id, user_id)
 );
@@ -265,6 +294,8 @@ CREATE TABLE IF NOT EXISTS family_invite_codes (
   code        VARCHAR(20) UNIQUE NOT NULL,
   created_by  INTEGER REFERENCES users(id) ON DELETE CASCADE,
   role        VARCHAR(20) DEFAULT 'member',
+  max_uses    INTEGER,
+  uses_count  INTEGER DEFAULT 0,
   is_active   BOOLEAN DEFAULT true,
   expires_at  TIMESTAMP,
   created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -274,13 +305,16 @@ CREATE TABLE IF NOT EXISTS family_budgets (
   id          SERIAL PRIMARY KEY,
   family_id   INTEGER REFERENCES families(id) ON DELETE CASCADE,
   category_id INTEGER REFERENCES categories(id) ON DELETE CASCADE,
+  name        VARCHAR(255),
   amount      DECIMAL(20, 2) NOT NULL,
   currency    VARCHAR(3) DEFAULT 'USD',
-  month       INTEGER NOT NULL CHECK (month BETWEEN 1 AND 12),
-  year        INTEGER NOT NULL,
+  period      VARCHAR(20) DEFAULT 'monthly',
+  month       INTEGER CHECK (month BETWEEN 1 AND 12),
+  year        INTEGER,
+  start_date  DATE,
+  end_date    DATE,
   created_by  INTEGER REFERENCES users(id),
-  created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE(family_id, category_id, month, year)
+  created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS family_goals (
@@ -293,6 +327,7 @@ CREATE TABLE IF NOT EXISTS family_goals (
   currency       VARCHAR(3) DEFAULT 'USD',
   target_date    DATE,
   is_completed   BOOLEAN DEFAULT false,
+  status         VARCHAR(20) DEFAULT 'active',
   created_by     INTEGER REFERENCES users(id),
   created_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -302,6 +337,7 @@ CREATE TABLE IF NOT EXISTS family_goal_contributions (
   goal_id           INTEGER REFERENCES family_goals(id) ON DELETE CASCADE,
   user_id           INTEGER REFERENCES users(id) ON DELETE CASCADE,
   amount            DECIMAL(20, 2) NOT NULL,
+  currency          VARCHAR(3) DEFAULT 'USD',
   note              TEXT,
   contribution_date DATE NOT NULL,
   created_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP

@@ -99,7 +99,7 @@ router.post('/register',
       if (error.code === 'ECONNREFUSED' || error.code === 'ETIMEDOUT' || error.code === 'ENOTFOUND') {
         return res.status(503).json({ error: "Ma'lumotlar bazasiga ulanib bo'lmadi. Keyinroq urinib ko'ring." });
       }
-      res.status(500).json({ error: 'Server xatosi yuz berdi', debug: process.env.NODE_ENV === 'production' ? error.message : undefined });
+      res.status(500).json({ error: 'Server xatosi yuz berdi' });
     }
   }
 );
@@ -155,7 +155,7 @@ router.post('/login',
       if (error.code === 'ECONNREFUSED' || error.code === 'ETIMEDOUT' || error.code === 'ENOTFOUND') {
         return res.status(503).json({ error: "Ma'lumotlar bazasiga ulanib bo'lmadi. Keyinroq urinib ko'ring." });
       }
-      res.status(500).json({ error: 'Server xatosi yuz berdi', debug: process.env.NODE_ENV === 'production' ? error.message : undefined });
+      res.status(500).json({ error: 'Server xatosi yuz berdi' });
     }
   }
 );

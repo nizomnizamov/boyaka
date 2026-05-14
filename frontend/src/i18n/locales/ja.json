@@ -230,7 +230,9 @@
     "currency": "通貨",
     "date": "日付",
     "note": "メモ",
-    "amount": "金額"
+    "amount": "金額",
+    "saving": "保存中...",
+    "update": "更新"
   },
   "recurring": {
     "title": "定期取引",

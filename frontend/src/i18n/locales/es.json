@@ -230,7 +230,9 @@
     "currency": "Moneda",
     "date": "Fecha",
     "note": "Nota",
-    "amount": "Cantidad"
+    "amount": "Cantidad",
+    "saving": "Guardando...",
+    "update": "Actualizar"
   },
   "recurring": {
     "title": "Transacciones Recurrentes",

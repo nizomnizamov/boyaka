@@ -230,7 +230,9 @@
     "currency": "Devise",
     "date": "Date",
     "note": "Note",
-    "amount": "Montant"
+    "amount": "Montant",
+    "saving": "Enregistrement...",
+    "update": "Mettre à jour"
   },
   "recurring": {
     "title": "Transactions Récurrentes",
