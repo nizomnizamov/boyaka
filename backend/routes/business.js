@@ -431,10 +431,11 @@ router.post('/:id/transactions', authMiddleware, async (req, res) => {
     const { project_id, type, amount, currency, description, category, date } = req.body;
     if (!type || !amount) return res.status(400).json({ error: 'type and amount are required' });
 
+    const txDate = date || new Date().toISOString().split('T')[0];
     const { rows } = await pool.query(
-      `INSERT INTO business_transactions(business_id, project_id, user_id, type, amount, currency, description, category, date)
-       VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *`,
-      [id, project_id || null, req.user.id, type, amount, currency || 'UZS', description, category, date || new Date().toISOString().split('T')[0]]
+      `INSERT INTO business_transactions(business_id, project_id, user_id, type, amount, currency, description, category, date, transaction_date)
+       VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$9) RETURNING *`,
+      [id, project_id || null, req.user.id, type, amount, currency || 'UZS', description, category, txDate]
     );
     res.json({ transaction: rows[0] });
   } catch (err) {

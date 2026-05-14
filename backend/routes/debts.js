@@ -100,8 +100,8 @@ router.post('/',
 
     try {
       const result = await pool.query(
-        `INSERT INTO debts (user_id, type, person_name, amount, currency, date, due_date, description)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
+        `INSERT INTO debts (user_id, type, person_name, contact_name, amount, currency, date, due_date, description)
+         VALUES ($1,$2,$3,$3,$4,$5,$6,$7,$8) RETURNING *`,
         [userId, type, person_name, amount, currency, date, due_date || null, description || null]
       );
       res.status(201).json(result.rows[0]);
