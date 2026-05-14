@@ -11,7 +11,10 @@ async function getMember(businessId, userId) {
     `SELECT * FROM business_members WHERE business_id=$1 AND user_id=$2`,
     [businessId, userId]
   );
-  return rows[0] || null;
+  if (!rows[0]) return null;
+  // status NULL bo'lsa 'active' deb hisoblash (migration compatibility)
+  if (!rows[0].status) rows[0].status = 'active';
+  return rows[0];
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -24,7 +27,7 @@ router.get('/', authMiddleware, async (req, res) => {
     const { rows } = await pool.query(
       `SELECT ba.*, bm.role, bm.status, bm.profit_share,
               u.full_name as created_by_name,
-              COUNT(DISTINCT bm2.id) FILTER (WHERE bm2.status='active') as member_count
+              COUNT(DISTINCT bm2.id) FILTER (WHERE COALESCE(bm2.status,'active')='active') as member_count
        FROM business_accounts ba
        INNER JOIN business_members bm ON ba.id=bm.business_id AND bm.user_id=$1
        LEFT JOIN users u ON ba.created_by=u.id
@@ -402,7 +405,7 @@ router.get('/:id/transactions', authMiddleware, async (req, res) => {
        LEFT JOIN business_projects bp ON bt.project_id=bp.id
        LEFT JOIN users u ON bt.user_id=u.id
        ${where}
-       ORDER BY bt.date DESC, bt.created_at DESC
+       ORDER BY COALESCE(bt.date, bt.transaction_date) DESC, bt.created_at DESC
        LIMIT $${pIdx} OFFSET $${pIdx+1}`,
       [...params, limit, offset]
     );
