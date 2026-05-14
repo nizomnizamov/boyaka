@@ -134,15 +134,15 @@ router.get('/categories', async (req, res) => {
     
     // Get top spending categories from last month
     const categoriesQuery = `
-      SELECT DISTINCT category_id, c.name as category_name, c.color as category_color
+      SELECT t.category_id, c.name as category_name, c.color as category_color
       FROM transactions t
       LEFT JOIN categories c ON t.category_id = c.id
-      WHERE t.user_id = $1 
+      WHERE t.user_id = $1
         AND t.type = 'expense'
         AND t.transaction_date >= CURRENT_DATE - INTERVAL '1 month'
         AND t.category_id IS NOT NULL
-      GROUP BY category_id, c.name, c.color
-      ORDER BY SUM(amount) DESC
+      GROUP BY t.category_id, c.name, c.color
+      ORDER BY SUM(t.amount) DESC
       LIMIT 5
     `;
     
