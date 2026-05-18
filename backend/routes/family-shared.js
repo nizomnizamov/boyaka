@@ -347,10 +347,11 @@ router.post('/:familyId/goals/:goalId/contribute', authMiddleware, async (req, r
     const convertedAmount = await convertCurrency(amount, currency, goal.currency);
 
     // Add contribution
+    const todayDate = new Date().toISOString().split('T')[0];
     await client.query(
-      `INSERT INTO family_goal_contributions (goal_id, user_id, amount, currency, note)
-       VALUES ($1, $2, $3, $4, $5)`,
-      [goalId, userId, amount, currency, note || null]
+      `INSERT INTO family_goal_contributions (goal_id, user_id, amount, currency, note, contribution_date)
+       VALUES ($1, $2, $3, $4, $5, $6)`,
+      [goalId, userId, amount, currency, note || null, todayDate]
     );
 
     // Update goal current amount

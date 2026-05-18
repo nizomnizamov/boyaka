@@ -128,12 +128,17 @@ router.put(
       const { id } = req.params;
       const fields = req.body;
 
-      // Build dynamic update query
+      // SECURITY: Allowlist of columns user can update
+      // (prevents SQL column-name injection — e.g., user_id, current_amount)
+      const ALLOWED = ['name', 'description', 'target_amount', 'currency',
+                       'deadline', 'priority', 'category', 'icon', 'color', 'is_completed'];
+
       const updates = [];
       const values = [id, req.user.id];
       let paramIndex = 3;
 
       Object.keys(fields).forEach((key) => {
+        if (!ALLOWED.includes(key)) return; // reject unknown/forbidden columns
         if (fields[key] !== undefined) {
           updates.push(`${key} = $${paramIndex}`);
           values.push(fields[key]);

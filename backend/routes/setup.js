@@ -12,9 +12,12 @@ router.post('/init-admin', async (req, res) => {
   try {
     const { email, secret } = req.body;
 
-    // Simple security: require a secret key from environment
-    const SETUP_SECRET = process.env.SETUP_SECRET || 'aurora-setup-2024';
-    
+    // SECURITY: SETUP_SECRET MUST be set in production
+    const SETUP_SECRET = process.env.SETUP_SECRET;
+    if (!SETUP_SECRET || SETUP_SECRET.length < 16) {
+      return res.status(503).json({ error: 'Setup endpoint disabled (SETUP_SECRET not configured)' });
+    }
+
     if (secret !== SETUP_SECRET) {
       return res.status(403).json({ error: 'Invalid setup secret' });
     }

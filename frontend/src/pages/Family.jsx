@@ -53,11 +53,13 @@ export default function Family() {
         api.get('/families'),
         api.get('/families/invitations/pending')
       ]);
-      setFamilies(familiesRes.data.families);
-      setInvitations(invitationsRes.data.invitations);
-      
-      if (familiesRes.data.families.length > 0 && !selectedFamily) {
-        selectFamily(familiesRes.data.families[0].id);
+      const familiesList = Array.isArray(familiesRes.data?.families) ? familiesRes.data.families : [];
+      const invitesList  = Array.isArray(invitationsRes.data?.invitations) ? invitationsRes.data.invitations : [];
+      setFamilies(familiesList);
+      setInvitations(invitesList);
+
+      if (familiesList.length > 0 && !selectedFamily) {
+        selectFamily(familiesList[0].id);
       }
     } catch (error) {
       

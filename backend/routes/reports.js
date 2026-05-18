@@ -104,11 +104,11 @@ router.get('/trends', async (req, res) => {
         currency,
         COALESCE(SUM(amount), 0) as total
        FROM transactions
-       WHERE user_id = $1 
-       AND transaction_date >= CURRENT_DATE - INTERVAL '${parseInt(months)} months'
+       WHERE user_id = $1
+       AND transaction_date >= CURRENT_DATE - ($2::int || ' months')::interval
        GROUP BY TO_CHAR(transaction_date, 'YYYY-MM'), type, currency
        ORDER BY month ASC`,
-      [req.user.id]
+      [req.user.id, parseInt(months) || 6]
     );
 
     // Group by month and convert currencies

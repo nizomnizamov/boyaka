@@ -31,7 +31,12 @@ const Goals = () => {
       const params = filter !== 'all' ? { is_completed: filter === 'completed' } : {};
       const res = await api.get('/goals', { params });
       setGoals(Array.isArray(res.data) ? res.data : []);
-    } catch { setGoals([]); }
+    } catch (err) {
+      setGoals([]);
+      if (err.response?.status !== 401) {
+        toast.error(t('common.loadError') || "Maqsadlarni yuklab bo'lmadi");
+      }
+    }
     finally { setLoading(false); }
   };
 

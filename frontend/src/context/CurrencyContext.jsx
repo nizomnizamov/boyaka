@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../lib/api';
 
 const CurrencyContext = createContext();
 
@@ -8,64 +8,51 @@ export function CurrencyProvider({ children }) {
   const [exchangeRates, setExchangeRates] = useState({});
   const [loading, setLoading] = useState(true);
 
-  const API_URL = import.meta.env.VITE_API_URL;
-
   // Load user's preferred currency
   useEffect(() => {
     const loadUserCurrency = async () => {
       try {
         const token = localStorage.getItem('token');
         if (token) {
-          const response = await axios.get(
-            `${API_URL}/currency/user/preference`,
-            {
-              headers: { Authorization: `Bearer ${token}` }
-            }
-          );
+          const response = await api.get('/currency/user/preference');
           setCurrency(response.data.currency || 'USD');
         }
       } catch (error) {
-        console.error('Error loading user currency:', error);
+        if (error.response?.status !== 401) {
+          console.error('Error loading user currency:', error.message);
+        }
       } finally {
         setLoading(false);
       }
     };
 
     loadUserCurrency();
-  }, [API_URL]);
+  }, []);
 
-  // Load exchange rates when currency changes
+  // Load exchange rates (USD base)
   useEffect(() => {
     const loadExchangeRates = async () => {
       try {
-        // Always load rates from USD as base
-        // This gives us: { VND: 25000, EUR: 0.85, ... } meaning 1 USD = X currency
-        const response = await axios.get(`${API_URL}/currency/rates/USD`);
-        setExchangeRates(response.data.rates);
+        const response = await api.get('/currency/rates/USD');
+        setExchangeRates(response.data.rates || {});
       } catch (error) {
-        console.error('Error loading exchange rates:', error);
+        console.error('Error loading exchange rates:', error.message);
       }
     };
 
     loadExchangeRates();
-  }, [API_URL]); // Remove currency dependency - always load USD rates
+  }, []);
 
   // Update user's currency preference
   const updateCurrency = async (newCurrency) => {
     try {
       const token = localStorage.getItem('token');
       if (token) {
-        await axios.put(
-          `${API_URL}/currency/user/preference`,
-          { currency: newCurrency },
-          {
-            headers: { Authorization: `Bearer ${token}` }
-          }
-        );
+        await api.put('/currency/user/preference', { currency: newCurrency });
       }
       setCurrency(newCurrency);
     } catch (error) {
-      console.error('Error updating currency:', error);
+      console.error('Error updating currency:', error.message);
       throw error;
     }
   };

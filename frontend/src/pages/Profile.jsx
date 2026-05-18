@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTranslation } from 'react-i18next';
-import axios from 'axios';
+import api from '../lib/api';
 import toast from 'react-hot-toast';
 import { User, Mail, Lock, Save, Eye, EyeOff, Shield, Settings2, Calendar, Hash } from 'lucide-react';
 import CurrencySelector from '../components/CurrencySelector';
@@ -12,7 +12,6 @@ import ThemeToggle from '../components/ThemeToggle';
 const Profile = () => {
   const { user, setUser } = useAuth();
   const { t } = useTranslation();
-  const API_URL = import.meta.env.VITE_API_URL;
 
   const [profileForm, setProfileForm] = useState({ full_name: '', email: '' });
   const [passwordForm, setPasswordForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
@@ -24,11 +23,15 @@ const Profile = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await axios.get(`${API_URL}/profile`);
+        const res = await api.get('/profile');
         setProfileData(res.data);
         const u = { ...user, created_at: res.data.created_at };
         setUser(u); localStorage.setItem('user', JSON.stringify(u));
-      } catch {}
+      } catch (err) {
+        if (err.response?.status !== 401) {
+          toast.error(t('profile.loadError') || 'Profilni yuklab bo\'lmadi');
+        }
+      }
     };
     if (user) {
       setProfileForm({ full_name: user.full_name || '', email: user.email || '' });
@@ -40,7 +43,7 @@ const Profile = () => {
     e.preventDefault();
     setIsUpdatingProfile(true);
     try {
-      const res = await axios.put(`${API_URL}/profile`, profileForm);
+      const res = await api.put('/profile', profileForm);
       const u = res.data.user;
       setUser(u); localStorage.setItem('user', JSON.stringify(u));
       toast.success(t('profile.updateSuccess') || 'Yangilandi!');
@@ -57,7 +60,7 @@ const Profile = () => {
     if (!isOAuth && !passwordForm.currentPassword) { toast.error(t('profile.currentPasswordRequired')); return; }
     setIsChangingPassword(true);
     try {
-      const res = await axios.put(`${API_URL}/profile/change-password`, passwordForm);
+      const res = await api.put('/profile/change-password', passwordForm);
       toast.success(res.data.message);
       setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
       if (isOAuth) { const u = { ...user, oauth_provider: 'local' }; setUser(u); localStorage.setItem('user', JSON.stringify(u)); }
