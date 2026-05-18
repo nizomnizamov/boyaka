@@ -2,7 +2,7 @@ import express from 'express';
 import { body, param, validationResult } from 'express-validator';
 import pool from '../config/database.js';
 import { authMiddleware } from '../middleware/auth.js';
-import { convertCurrency } from '../utils/currency.js';
+import { convertCurrency, getExchangeRate } from '../utils/currency.js';
 
 const router = express.Router();
 router.use(authMiddleware);
@@ -55,50 +55,41 @@ router.get('/', async (req, res) => {
     params.push(limit, offset);
 
     const result = await pool.query(query, params);
-    
-    // Convert amounts to target currency
-    const convertedTransactions = await Promise.all(
-      result.rows.map(async (transaction) => {
-        if (transaction.currency === targetCurrency) {
-          // No conversion needed
-          return {
-            ...transaction,
-            original_amount: transaction.amount,
-            original_currency: transaction.currency,
-            converted_amount: transaction.amount,
-            display_currency: targetCurrency
-          };
-        } else {
-          // Convert to target currency
-          try {
-            const convertedAmount = await convertCurrency(
-              parseFloat(transaction.amount),
-              transaction.currency,
-              targetCurrency
-            );
-            return {
-              ...transaction,
-              original_amount: transaction.amount,
-              original_currency: transaction.currency,
-              amount: convertedAmount, // Override amount with converted value
-              currency: targetCurrency, // Override currency to display currency
-              converted_amount: convertedAmount,
-              display_currency: targetCurrency
-            };
-          } catch (error) {
-            console.error(`Currency conversion error for transaction ${transaction.id}:`, error);
-            // Return original if conversion fails
-            return {
-              ...transaction,
-              original_amount: transaction.amount,
-              original_currency: transaction.currency,
-              converted_amount: transaction.amount,
-              display_currency: transaction.currency
-            };
-          }
-        }
-      })
-    );
+
+    // PERF: Batch fetch exchange rates ONCE for all unique source currencies
+    // (eliminates N+1 — was calling convertCurrency per transaction)
+    const uniqueCurrencies = [...new Set(result.rows.map(t => t.currency))].filter(c => c !== targetCurrency);
+    const rateMap = { [targetCurrency]: 1 };
+    await Promise.all(uniqueCurrencies.map(async (cur) => {
+      try {
+        rateMap[cur] = await getExchangeRate(cur, targetCurrency);
+      } catch {
+        rateMap[cur] = null; // mark as failed
+      }
+    }));
+
+    const convertedTransactions = result.rows.map((transaction) => {
+      const rate = rateMap[transaction.currency];
+      if (rate === null || rate === undefined) {
+        return {
+          ...transaction,
+          original_amount: transaction.amount,
+          original_currency: transaction.currency,
+          converted_amount: transaction.amount,
+          display_currency: transaction.currency,
+        };
+      }
+      const convertedAmount = parseFloat(transaction.amount) * rate;
+      return {
+        ...transaction,
+        original_amount: transaction.amount,
+        original_currency: transaction.currency,
+        amount: convertedAmount,
+        currency: targetCurrency,
+        converted_amount: convertedAmount,
+        display_currency: targetCurrency,
+      };
+    });
     
     res.json({ transactions: convertedTransactions, count: convertedTransactions.length });
   } catch (error) {

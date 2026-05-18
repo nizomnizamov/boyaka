@@ -70,12 +70,17 @@ router.post('/register',
         { name: 'Boshqa',      type: 'expense', icon: 'more-horizontal',color: '#94A3B8' },
       ];
 
-      for (const cat of defaultCategories) {
-        await pool.query(
-          'INSERT INTO categories (user_id, name, type, icon, color) VALUES ($1, $2, $3, $4, $5)',
-          [user.id, cat.name, cat.type, cat.icon, cat.color]
-        );
-      }
+      // PERF: Single multi-row INSERT instead of 12 separate queries
+      const values = [];
+      const placeholders = defaultCategories.map((cat, i) => {
+        const base = i * 5;
+        values.push(user.id, cat.name, cat.type, cat.icon, cat.color);
+        return `($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5})`;
+      }).join(', ');
+      await pool.query(
+        `INSERT INTO categories (user_id, name, type, icon, color) VALUES ${placeholders}`,
+        values
+      );
 
       // Generate JWT with userId for consistency
       const token = jwt.sign(

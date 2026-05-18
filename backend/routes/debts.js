@@ -2,7 +2,7 @@ import express from 'express';
 import { body, validationResult } from 'express-validator';
 import pool from '../config/database.js';
 import { authMiddleware } from '../middleware/auth.js';
-import { convertCurrency } from '../utils/currency.js';
+import { convertCurrency, getExchangeRate } from '../utils/currency.js';
 
 const router = express.Router();
 router.use(authMiddleware);
@@ -30,15 +30,22 @@ router.get('/', async (req, res) => {
       params
     );
 
-    // Summary
+    // Summary — batch fetch rates once (avoids N+1)
     const userCurrency = (await pool.query('SELECT currency FROM users WHERE id=$1', [userId])).rows[0]?.currency || 'UZS';
+    const uniqueCurs = [...new Set(result.rows.map(d => d.currency))].filter(c => c !== userCurrency);
+    const rateMap = { [userCurrency]: 1 };
+    await Promise.all(uniqueCurs.map(async (c) => {
+      try { rateMap[c] = await getExchangeRate(c, userCurrency); }
+      catch { rateMap[c] = 1; }
+    }));
 
     let totalLent = 0, totalBorrowed = 0, totalLentPaid = 0, totalBorrowedPaid = 0;
     for (const d of result.rows) {
-      const amt     = await convertCurrency(parseFloat(d.amount), d.currency, userCurrency);
-      const paid    = await convertCurrency(parseFloat(d.total_paid), d.currency, userCurrency);
-      if (d.type === 'lent')     { totalLent += amt;     totalLentPaid += paid; }
-      else                       { totalBorrowed += amt; totalBorrowedPaid += paid; }
+      const rate = rateMap[d.currency] ?? 1;
+      const amt  = parseFloat(d.amount) * rate;
+      const paid = parseFloat(d.total_paid) * rate;
+      if (d.type === 'lent') { totalLent += amt;     totalLentPaid += paid; }
+      else                   { totalBorrowed += amt; totalBorrowedPaid += paid; }
     }
 
     res.json({

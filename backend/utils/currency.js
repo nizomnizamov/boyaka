@@ -16,36 +16,45 @@ const FALLBACK_RATES = {
   'AED_USD': 1/3.67,  'JPY_USD': 1/149, 'CNY_USD': 1/7.24,
 };
 
+// In-memory rate cache (1 hour TTL) — avoids DB hit on hot paths
+const rateMemCache = new Map();
+const RATE_TTL_MS = 60 * 60 * 1000;
+
 export async function getExchangeRate(fromCurrency, toCurrency) {
   try {
-    // If same currency, return 1
-    if (fromCurrency === toCurrency) {
-      return 1;
+    if (fromCurrency === toCurrency) return 1;
+
+    // 1. In-memory cache (fastest)
+    const memKey = `${fromCurrency}_${toCurrency}`;
+    const memHit = rateMemCache.get(memKey);
+    if (memHit && Date.now() - memHit.ts < RATE_TTL_MS) {
+      return memHit.rate;
     }
 
-    // No API key — use fallback rates
+    // 2. No API key → fallback static rates
     if (!API_KEY) {
-      const key = `${fromCurrency}_${toCurrency}`;
-      return FALLBACK_RATES[key] || 1;
+      const rate = FALLBACK_RATES[memKey] || 1;
+      rateMemCache.set(memKey, { rate, ts: Date.now() });
+      return rate;
     }
 
-    // Check cache first (valid for 24 hours)
+    // 3. DB cache (24h)
     const cachedRate = await getCachedRate(fromCurrency, toCurrency);
     if (cachedRate) {
-      return parseFloat(cachedRate.rate);
+      const rate = parseFloat(cachedRate.rate);
+      rateMemCache.set(memKey, { rate, ts: Date.now() });
+      return rate;
     }
 
-    // Fetch from API
+    // 4. Fetch from API
     const response = await axios.get(
       `${BASE_URL}/${API_KEY}/pair/${fromCurrency}/${toCurrency}`
     );
 
     if (response.data.result === 'success') {
       const rate = response.data.conversion_rate;
-      
-      // Cache it
       await cacheRate(fromCurrency, toCurrency, rate);
-      
+      rateMemCache.set(memKey, { rate, ts: Date.now() });
       return rate;
     } else {
       throw new Error('Failed to fetch exchange rate');
