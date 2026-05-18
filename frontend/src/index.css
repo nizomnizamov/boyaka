@@ -273,6 +273,8 @@
   .num-display {
     font-variant-numeric: tabular-nums;
     font-feature-settings: "tnum";
+    overflow-wrap: anywhere;
+    word-break: break-word;
   }
 
   /* ──────────────────────────────────────────

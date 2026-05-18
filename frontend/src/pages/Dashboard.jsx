@@ -129,17 +129,17 @@ const BalanceHeroCard = ({ balance, income, expense, formatCurrency }) => {
 
 // ─── StatCard ─────────────────────────────────────────────────────────────────
 const StatCard = ({ icon: Icon, iconBg, iconColor, label, value, valueColor, sub }) => (
-  <div className="card py-4 px-4 flex flex-col gap-1">
+  <div className="card p-3 sm:p-4 flex flex-col gap-1 min-w-0">
     <div className={`w-8 h-8 rounded-xl flex items-center justify-center mb-1 ${iconBg}`}>
       <Icon size={15} className={iconColor} strokeWidth={2.5} />
     </div>
-    <p className="text-[11px] font-semibold text-text-secondary dark:text-dark-text-secondary uppercase tracking-wide">
+    <p className="text-[10px] sm:text-[11px] font-semibold text-text-secondary dark:text-dark-text-secondary uppercase tracking-wide truncate">
       {label}
     </p>
-    <p className={`text-2xl font-bold tracking-tight num-display leading-none ${valueColor}`}>
+    <p className={`text-base sm:text-lg lg:text-2xl font-bold tracking-tight num-display leading-tight break-all ${valueColor}`}>
       {value}
     </p>
-    <p className="text-[11px] text-text-muted dark:text-dark-text-muted mt-0.5">{sub}</p>
+    {sub && <p className="text-[10px] sm:text-[11px] text-text-muted dark:text-dark-text-muted mt-0.5 truncate">{sub}</p>}
   </div>
 );
 

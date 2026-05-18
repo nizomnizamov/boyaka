@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import api from '../lib/api';
 import { useCurrency } from '../context/CurrencyContext';
-import { Calendar, Download, TrendingUp, TrendingDown, FileText, FileSpreadsheet, Activity } from 'lucide-react';
+import { Calendar, Download, TrendingUp, TrendingDown, Wallet, FileText, FileSpreadsheet, Activity } from 'lucide-react';
 import Analytics from './Analytics';
 import { format, subMonths, startOfMonth, endOfMonth } from 'date-fns';
 import jsPDF from 'jspdf';
@@ -321,20 +321,31 @@ const Reports = () => {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-3 gap-3">
-        <div className="card py-4 text-center">
-          <TrendingUp size={18} className="text-income dark:text-income-dark mx-auto mb-2" />
-          <p className="text-xs font-semibold text-text-secondary dark:text-dark-text-secondary mb-1">{t('reports.totalIncome')}</p>
-          <p className="text-lg font-bold text-income dark:text-income-dark num-display">{formatCurrency(income)}</p>
+      <div className="grid grid-cols-3 gap-2 sm:gap-3">
+        <div className="card p-3 sm:p-4 flex flex-col items-center justify-between min-h-[110px] sm:min-h-[120px] text-center">
+          <TrendingUp size={18} className="text-income dark:text-income-dark mb-1.5" />
+          <p className="text-[10px] sm:text-xs font-semibold text-text-secondary dark:text-dark-text-secondary leading-tight line-clamp-2">
+            {t('reports.totalIncome')}
+          </p>
+          <p className="text-xs sm:text-sm lg:text-base font-bold text-income dark:text-income-dark num-display break-all leading-tight mt-1">
+            {formatCurrency(income)}
+          </p>
         </div>
-        <div className="card py-4 text-center">
-          <TrendingDown size={18} className="text-expense dark:text-expense-dark mx-auto mb-2" />
-          <p className="text-xs font-semibold text-text-secondary dark:text-dark-text-secondary mb-1">{t('reports.totalExpenses')}</p>
-          <p className="text-lg font-bold text-expense dark:text-expense-dark num-display">{formatCurrency(expense)}</p>
+        <div className="card p-3 sm:p-4 flex flex-col items-center justify-between min-h-[110px] sm:min-h-[120px] text-center">
+          <TrendingDown size={18} className="text-expense dark:text-expense-dark mb-1.5" />
+          <p className="text-[10px] sm:text-xs font-semibold text-text-secondary dark:text-dark-text-secondary leading-tight line-clamp-2">
+            {t('reports.totalExpenses')}
+          </p>
+          <p className="text-xs sm:text-sm lg:text-base font-bold text-expense dark:text-expense-dark num-display break-all leading-tight mt-1">
+            {formatCurrency(expense)}
+          </p>
         </div>
-        <div className="card py-4 text-center">
-          <p className="text-xs font-semibold text-text-secondary dark:text-dark-text-secondary mb-1 mt-7">{t('reports.netBalance')}</p>
-          <p className={`text-lg font-bold num-display ${balance >= 0 ? 'text-income dark:text-income-dark' : 'text-expense dark:text-expense-dark'}`}>
+        <div className="card p-3 sm:p-4 flex flex-col items-center justify-between min-h-[110px] sm:min-h-[120px] text-center">
+          <Wallet size={18} className={`mb-1.5 ${balance >= 0 ? 'text-income dark:text-income-dark' : 'text-expense dark:text-expense-dark'}`} />
+          <p className="text-[10px] sm:text-xs font-semibold text-text-secondary dark:text-dark-text-secondary leading-tight line-clamp-2">
+            {t('reports.netBalance')}
+          </p>
+          <p className={`text-xs sm:text-sm lg:text-base font-bold num-display break-all leading-tight mt-1 ${balance >= 0 ? 'text-income dark:text-income-dark' : 'text-expense dark:text-expense-dark'}`}>
             {balance >= 0 ? '+' : '−'}{formatCurrency(Math.abs(balance))}
           </p>
         </div>

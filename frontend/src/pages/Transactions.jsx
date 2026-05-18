@@ -80,9 +80,9 @@ const TxItem = ({ tx, formatCurrency, onEdit, onDelete }) => {
 
 // ─── Summary card ─────────────────────────────────────────────────────────────
 const SummaryCard = ({ label, value, color }) => (
-  <div className="card py-3.5 text-center">
-    <p className="card-label mb-1.5">{label}</p>
-    <p className={`text-base font-bold num-display ${color}`}>{value}</p>
+  <div className="card p-3 text-center min-w-0 min-h-[80px] flex flex-col justify-center">
+    <p className="card-label mb-1.5 text-[10px] sm:text-xs truncate">{label}</p>
+    <p className={`text-xs sm:text-sm lg:text-base font-bold num-display break-all leading-tight ${color}`}>{value}</p>
   </div>
 );
 
